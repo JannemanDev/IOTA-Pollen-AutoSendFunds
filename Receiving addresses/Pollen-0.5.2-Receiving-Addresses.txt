@@ -1,4 +1,5 @@
-Janneman		1CdfhogYCBMPsu3s5zpGgdGFKRDr43uQomuKchkREEvj
+Janneman (gui)	1CdfhogYCBMPsu3s5zpGgdGFKRDr43uQomuKchkREEvj
+Janneman (cli)	14H4hEjCF7sSQNZca1HBcC5H3B7ALkmxnQHnTW1Um8Uwb
 teddy kgb		1BX6dQo9nFYn43hchcEq57aD584y1UVh1eRaavyfFXVQX		
 tristanc		1CC1K6gTZC7xmtsVSKtodou1mJBcsoW1aRMZPGAx1i1oD
 LaFlamaBlanca	13UBWopWLhNPbc7HoqERpK399ujY5Bp1o7poc747sZjDN
@@ -15,3 +16,5 @@ ONOUAGH			16FR8jHHe1uZjZF7Do41sqemoWpL7SgEMkcChk8izKsPS
 H-Milch			17PswqJKxPtMnJjqiJ5M4hdsDN52gKGSyAMe9SqY1EizD
 wadada			15DsjUy2FN4LHDTotFBgFu4PMobs4bfn9SADvMAbW95u2
 norbus161		1BtzyCyZcaRt1w4Brp3ffaH88WF9d9kqzKv98BemBBuPX
+Phantom3D		1FoBuHBtkagSyhUH4oGGuz24FUGQWrsoKcw1SDx8PRRYh
+DeFi BlogNews	1HhFEcPvoGsdFveBXoyBCNsvbUb38Qa1ZMS8qTFz1oSre
