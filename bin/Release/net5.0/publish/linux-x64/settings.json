@@ -1,0 +1,17 @@
+{
+  "LogFileTransactions" :  "", 
+  "PublishReceiveAddress": true,
+  "VerifyAddressesAtStartup": true,
+  "CliWalletFullpath": "c:\\temp\\iota\\cli-wallet.exe",
+  "AccessManaId": "AL7bejS6tmeu4sttiBzQzZnTKs3xYRUDLpDixXYpoaF8",
+  "ConsensusManaId": "AL7bejS6tmeu4sttiBzQzZnTKs3xYRUDLpDixXYpoaF8",
+  "UrlWalletReceiveAddresses": "c:\\MyData\\Persoonlijk\\IOTA\\IOTA-Pollen-AutoSendFunds\\Receiving addresses\\Pollen-0.5.2-Receiving-Addresses-LocalDev.json",
+  "MinAmountToSend": 1,
+  "MaxAmountToSend": 1,
+  "TokensToSent": [ "IOTA", "Bla" ],
+  "StopWhenNoBalanceWithCreditIsAvailable": true,
+  "TimeoutInSecondsBetweenTransactions": 20,
+  "ShowOutputCliWallet": true,
+  "PickRandomDestinationAddress": true,
+  "MaxWaitingTimeInSecondsForRequestingFunds": 60
+}
