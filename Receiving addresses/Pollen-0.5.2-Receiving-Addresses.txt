@@ -1,6 +1,6 @@
-Janneman (gui)	1CdfhogYCBMPsu3s5zpGgdGFKRDr43uQomuKchkREEvj
-Janneman (cli)	14H4hEjCF7sSQNZca1HBcC5H3B7ALkmxnQHnTW1Um8Uwb
-teddy kgb		1BX6dQo9nFYn43hchcEq57aD584y1UVh1eRaavyfFXVQX		
+Janneman (gui)	1AuGjGz8xUJeLoNqGKnAAmnSAqoKa2S29SpjXC7hWwd4h
+Janneman (cli)	1DoGgwqkog84oPUSaCrKwXPrjxiVnedFFaSUUdQSt5p2a
+teddy kgb		1AA8B93ueJCiLRnghtgeJFMoMCAuNh6xisDpCoMSPMs8x		
 tristanc		1CC1K6gTZC7xmtsVSKtodou1mJBcsoW1aRMZPGAx1i1oD
 LaFlamaBlanca	13UBWopWLhNPbc7HoqERpK399ujY5Bp1o7poc747sZjDN
 ZiGZaG			17CH6rNx8ftZEqBhc8aXAuJhimrGuEJwCd1V9jK5vaiy2
@@ -18,3 +18,4 @@ wadada			15DsjUy2FN4LHDTotFBgFu4PMobs4bfn9SADvMAbW95u2
 norbus161		1BtzyCyZcaRt1w4Brp3ffaH88WF9d9kqzKv98BemBBuPX
 Phantom3D		1FoBuHBtkagSyhUH4oGGuz24FUGQWrsoKcw1SDx8PRRYh
 DeFi BlogNews	1HhFEcPvoGsdFveBXoyBCNsvbUb38Qa1ZMS8qTFz1oSre
+S1nex			1uDeBEWr64b1tHUhBYpZRN3RyMA4wkTB4YXsRgd61a5f
