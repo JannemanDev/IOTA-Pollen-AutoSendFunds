@@ -14,7 +14,13 @@ using SharedLib.Services;
 using SimpleBase;
 
 /*
+ * Alternatieve node: http://45.83.107.51:8080/
  *
+ * auto wallet create
+ * auto request funds
+ * use same receive adress or use unspent adres
+ * save wallet address in api repo
+
  * Netwerkversion en versie bewaren en alles hieraan hangen (log, nodes, ...)
  *      
  * AddressBook:

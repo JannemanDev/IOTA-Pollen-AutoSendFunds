@@ -21,10 +21,8 @@ namespace SharedLib
         public Address(string addressValue, bool isReceive)
         {
             addressValue = addressValue.Trim();
-            //address must be 33 bytes (base58 encoded)
-            String decodedAddress;
-            if (!TryDecodeReceiveAddress(addressValue, out decodedAddress) || (decodedAddress.Length != Iota_Address_Length * 2))
-                throw new ArgumentException($"Address address {addressValue} is not in correct format");
+            if (!IsIotaAddress(addressValue))
+                throw new ArgumentException($"Address addressValue {addressValue} is not in correct format");
 
             OwnerName = "Anonymous";
             AddressValue = addressValue;
@@ -42,12 +40,21 @@ namespace SharedLib
             return $"{OwnerName} {AddressValue}";
         }
 
-        public static bool TryDecodeReceiveAddress(string receiveAddress, out string decodedAddress)
+        public static bool IsIotaAddress(string addressValue)
         {
-            decodedAddress = "";
+            String decodedAddress;
+
+            addressValue = addressValue.Trim();
+            return TryDecode(addressValue, out decodedAddress) &&
+                   (decodedAddress.Length == Iota_Address_Length * 2); //addressValue must be 33 bytes (base58 encoded)
+        }
+
+        public static bool TryDecode(string addressValue, out string decodedAddressValue)
+        {
+            decodedAddressValue = "";
             try
             {
-                decodedAddress = DecodeReceiveAddress(receiveAddress);
+                decodedAddressValue = Decode(addressValue);
                 return true;
             }
             catch (Exception e)
@@ -56,9 +63,9 @@ namespace SharedLib
             }
         }
 
-        static string DecodeReceiveAddress(string receiveAddress)
+        static string Decode(string addressValue)
         {
-            Span<byte> result = Base58.Bitcoin.Decode(receiveAddress);
+            Span<byte> result = Base58.Bitcoin.Decode(addressValue);
             string s = BitConverter.ToString(result.ToArray());
             return s.Replace("-", "");
         }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AddressBookWebService.ViewModels;
 using Microsoft.Extensions.Configuration;
 using SharedLib;
 using SharedLib.Services;
@@ -45,9 +46,14 @@ namespace AddressBookWebService.Controllers
         }
 
         [HttpGet("verify/{addressValue}")]
-        public bool Verify(string addressValue)
+        public AddressVerification Verify(string addressValue)
         {
-            return _addressService.VerifyAddress(addressValue);
+            bool result;
+            result = Address.IsIotaAddress(addressValue);
+            if (!result) return new AddressVerification(false, "Not a valid IOTA address!");
+            result = _addressService.AddressExist(addressValue);
+            if (!result) return new AddressVerification(false, "Address not available!");
+            else return new AddressVerification(true, "");
         }
 
         // POST api/<AddressController>

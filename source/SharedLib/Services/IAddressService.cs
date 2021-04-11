@@ -6,6 +6,6 @@ namespace SharedLib.Services
     {
         public HashSet<Address> GetAllAddresses();
         public bool AddAddress(Address address);
-        public bool VerifyAddress(string addressValue);
+        public bool AddressExist(string addressValue);
     }
 }

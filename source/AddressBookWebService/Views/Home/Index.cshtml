@@ -25,7 +25,7 @@
             </tr>
             <tr>
                 <td></td>
-                <td class="text-left"><input type="submit" value="Submit" /></td>
+                <td class="text-left"><input id="addressSubmit" type="submit" value="Submit" disabled /></td>
             </tr>
         </table>
         @if (@ViewBag.Updated != null && @ViewBag.Updated)
@@ -50,17 +50,23 @@
                 <th>
                     Receive Address
                 </th>
+                <th>
+                    Is Verified?
+                </th>
             </tr>
             @foreach (Address address in @ViewBag.Addresses)
             {
-                <tr>
-                    <td class="text-left">
-                        @Html.DisplayFor(modelItem => address.OwnerName)
-                    </td>
-                    <td class="text-left">
-                        @Html.DisplayFor(modelItem => address.AddressValue)
-                    </td>
-                </tr>
+        <tr>
+            <td class="text-left">
+                @Html.DisplayFor(modelItem => address.OwnerName)
+            </td>
+            <td class="text-left">
+                @Html.DisplayFor(modelItem => address.AddressValue)
+            </td>
+            <td class="text-center">
+                @Html.DisplayFor(modelItem => address.IsVerified)
+            </td>
+        </tr>
             }
         </table>
     }

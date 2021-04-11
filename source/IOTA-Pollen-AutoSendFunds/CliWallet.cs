@@ -59,7 +59,9 @@ namespace IOTA_Pollen_AutoSendFunds
                 //balance
                 List<string> balanceSubColumns = columns[1].Split(" ").ToList();
                 int balanceSubColumn = Convert.ToInt32(balanceSubColumns[0]);
-                string unitSubColumn = balanceSubColumns[1];
+                string unitSubColumn = "";
+                if (balanceSubColumns.Count > 1) //is optional (currently not used)
+                    unitSubColumn = balanceSubColumns[1];
 
                 //color
                 string color = columns[2];

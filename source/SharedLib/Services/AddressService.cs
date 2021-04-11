@@ -37,7 +37,7 @@ namespace SharedLib.Services
 
             foreach (Address address in receiveAddresses)
             {
-                address.IsVerified = VerifyAddress(address.AddressValue);
+                address.IsVerified = AddressExist(address.AddressValue);
             }
 
             return receiveAddresses;
@@ -56,17 +56,18 @@ namespace SharedLib.Services
             addresses.Add(address);
             string json = JsonConvert.SerializeObject(addresses, Formatting.Indented);
             File.WriteAllText(_addressUrl, json);
-            
+
             return updated;
         }
 
-        public bool VerifyAddress(string addressValue)
+        public bool AddressExist(string addressValue)
         {
             var client = new RestClient(_dashboardUrl);
-            var request = new RestRequest($"/api/address/{addressValue}", DataFormat.Json);
+            string url = $"/api/address/{addressValue}";
+            var request = new RestRequest(url, DataFormat.Json);
 
             IRestResponse response = client.Get(request);
             return response.IsSuccessful;
         }
-   }
+    }
 }

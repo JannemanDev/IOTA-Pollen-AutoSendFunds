@@ -19,6 +19,7 @@ namespace SharedLib
         public List<string> TokensToSent { get; set; }
         public bool StopWhenNoBalanceWithCreditIsAvailable { get; set; }
         public int TimeoutInSecondsBetweenTransactions { get; set; }
+        public string WaitForPreviousTransactionToFinish { get; set; }
         public bool ShowOutputCliWallet { get; set; }
         public bool PickRandomDestinationAddress { get; set; }
         public int MaxWaitingTimeInSecondsForRequestingFunds { get; set; }

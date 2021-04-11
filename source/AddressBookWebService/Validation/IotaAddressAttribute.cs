@@ -14,7 +14,7 @@ namespace AddressBookWebService.Validation
         {
             string address = value.ToString();
             string decodedAddress = "";
-            bool result = Address.TryDecodeReceiveAddress(address, out decodedAddress);
+            bool result = Address.TryDecode(address, out decodedAddress);
             if (result) return ValidationResult.Success;
             else return new ValidationResult("Invalid address");
         }
