@@ -12,9 +12,8 @@ namespace AddressBookWebService.Validation
     {
         protected override ValidationResult IsValid (object value, ValidationContext validationContext)
         {
-            string address = value.ToString();
-            string decodedAddress = "";
-            bool result = Address.TryDecode(address, out decodedAddress);
+            string addressValue = value.ToString();
+            bool result = Address.IsIotaAddress(addressValue);
             if (result) return ValidationResult.Success;
             else return new ValidationResult("Invalid address");
         }

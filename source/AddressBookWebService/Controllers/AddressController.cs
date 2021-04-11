@@ -45,8 +45,8 @@ namespace AddressBookWebService.Controllers
             return _addressService.GetAllAddresses().Single(address => address.AddressValue == addressValue);
         }
 
-        [HttpGet("verify/{addressValue}")]
-        public AddressVerification Verify(string addressValue)
+        [HttpGet("validate/{addressValue}")]
+        public AddressVerification Validate(string addressValue)
         {
             bool result;
             result = Address.IsIotaAddress(addressValue);
@@ -58,8 +58,9 @@ namespace AddressBookWebService.Controllers
 
         // POST api/<AddressController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public void Post(AddressViewModel addressViewModel)
         {
+            Console.WriteLine("test");
         }
 
         // PUT api/<AddressController>/5
