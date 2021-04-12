@@ -15,10 +15,10 @@ namespace SharedLib
 
         public string OwnerName { get; set; }
         public string AddressValue { get; set; }
-        public bool IsReceive { get; set; }
+        public bool IsSpent { get; set; }
         public bool IsVerified { get; set; }
 
-        public Address(string addressValue, bool isReceive)
+        public Address(string addressValue, bool isSpent)
         {
             addressValue = addressValue.Trim();
             if (!IsIotaAddress(addressValue))
@@ -26,11 +26,11 @@ namespace SharedLib
 
             OwnerName = "Anonymous";
             AddressValue = addressValue;
-            IsReceive = isReceive;
+            IsSpent = isSpent;
         }
 
         [JsonConstructor]
-        public Address(string ownerName, string addressValue, bool isReceive) : this(addressValue, isReceive)
+        public Address(string ownerName, string addressValue, bool isSpent) : this(addressValue, isSpent)
         {
             OwnerName = ownerName;
         }

@@ -9,11 +9,12 @@ namespace SharedLib
     public class Settings
     {
         public bool PublishReceiveAddress { get; set; }
-        public bool VerifyAddressesAtStartup { get; set; }
         public string CliWalletFullpath { get; set; }
         public string AccessManaId { get; set; }
         public string ConsensusManaId { get; set; }
         public string UrlWalletReceiveAddresses { get; set; }
+        public bool VerifyIfReceiveAddressesExist { get; set; }
+        public string GoShimmerDashboardUrl { get; set; }
         public int MinAmountToSend { get; set; }
         public int MaxAmountToSend { get; set; }
         public List<string> TokensToSent { get; set; }

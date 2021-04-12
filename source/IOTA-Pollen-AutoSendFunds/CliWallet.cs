@@ -13,8 +13,8 @@ namespace IOTA_Pollen_AutoSendFunds
         public List<Balance> Balances { get; set; }
         public List<Address> Addresses { get; set; }
 
-        public List<Address> ReceiveAddresses => Addresses.Where(address => address.IsReceive).ToList();
-        public List<Address> SpentAddresses => Addresses.Where(address => !address.IsReceive).ToList();
+        public Address ReceiveAddress => Addresses.FirstOrDefault();
+        public List<Address> SpentAddresses => Addresses.Where(address => address.IsSpent).ToList();
 
         public CliWallet()
         {
@@ -114,13 +114,9 @@ namespace IOTA_Pollen_AutoSendFunds
                 List<string> columns = line.Split("\t", StringSplitOptions.RemoveEmptyEntries).ToList();
                 int index = Convert.ToInt32(columns[0]); //skip/not used
                 string addressValue = columns[1];
-                bool isReceive = !Convert.ToBoolean(columns[2]);
+                bool isSpent = !Convert.ToBoolean(columns[2]);
                 Address address;
-                if (isReceive)
-                {
-                    address = new Address("Yourself", addressValue, true);
-                }
-                else address = new Address("Somebody else", addressValue, false);
+                address = new Address("Yourself", addressValue, isSpent);
 
                 Addresses.Add(address);
             }

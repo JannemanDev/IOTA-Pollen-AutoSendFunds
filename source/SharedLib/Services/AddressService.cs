@@ -20,7 +20,7 @@ namespace SharedLib.Services
             _dashboardUrl = dashboardUrl;
         }
 
-        public HashSet<Address> GetAllAddresses()
+        public HashSet<Address> GetAllAddresses(bool verifyIfReceiveAddressesExist = false)
         {
             //check for addressUrl or local file
             string json;
@@ -35,9 +35,12 @@ namespace SharedLib.Services
             else json = File.ReadAllText(_addressUrl); //local file
             HashSet<Address> receiveAddresses = JsonConvert.DeserializeObject<HashSet<Address>>(json);
 
-            foreach (Address address in receiveAddresses)
+            if (verifyIfReceiveAddressesExist)
             {
-                address.IsVerified = AddressExist(address.AddressValue);
+                foreach (Address address in receiveAddresses)
+                {
+                    address.IsVerified = AddressExist(address.AddressValue);
+                }
             }
 
             return receiveAddresses;

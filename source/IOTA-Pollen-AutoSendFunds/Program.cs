@@ -17,8 +17,8 @@ using SimpleBase;
  * Alternatieve node: http://45.83.107.51:8080/
  *
  * auto wallet create
- * auto request funds
- * use same receive adress or use unspent adres
+ * auto (re)request funds
+ * make an option for: use same receive adress or use unspent adres
  * save wallet address in api repo
 
  * Netwerkversion en versie bewaren en alles hieraan hangen (log, nodes, ...)
@@ -53,14 +53,13 @@ using SimpleBase;
  *  json ipv txt
  *  logic in service klasse zetten zodat zowel rest als mvc controller deze kan aanroepen
  *  list of addresses
- *  hosten op ....? fhict of docker lokaal?
+ *  api/mvc server hosten op: fhict, docker filesrv3, ...?
  */
 
 //Todo:
 //-console output gaat door elkaar agv async stuff
 //-address validation (sometimes its seed or only 1 column etc..)
 //-check for correct version icm addresses
-//-request funds when exist but empty
 //-test requestFunds
 //-test filtering on tokenstosent
 //-test with colored tokens -> color token is uniek (=address), tokenname hoeft niet uniek te zijn?!
@@ -79,6 +78,7 @@ namespace IOTA_Pollen_AutoSendFunds
             Console.WriteLine(" Escape to quit");
             Console.WriteLine(" Space to pause\n");
 
+            
             settings = MiscUtil.LoadSettings(Directory.GetCurrentDirectory());
 
             //wallets = Test();
@@ -93,8 +93,8 @@ namespace IOTA_Pollen_AutoSendFunds
 
             await cliWallet.UpdateAddresses();
 
-            AddressService addressService = new AddressService(Program.settings.UrlWalletReceiveAddresses,"");
-            List<Address> receiveAddresses = addressService.GetAllAddresses().ToList();
+            AddressService addressService = new AddressService(Program.settings.UrlWalletReceiveAddresses, Program.settings.GoShimmerDashboardUrl);
+            List<Address> receiveAddresses = addressService.GetAllAddresses(Program.settings.VerifyIfReceiveAddressesExist).ToList();
             if (receiveAddresses.Count == 0)
             {
                 Console.WriteLine(
@@ -106,7 +106,7 @@ namespace IOTA_Pollen_AutoSendFunds
 
             //only consider receiveAddresses of other persons
             receiveAddresses = receiveAddresses
-                .Where(receiveAddresses => !cliWallet.ReceiveAddresses.Contains(receiveAddresses)).ToList();
+                .Where(receiveAddress => !receiveAddress.Equals(cliWallet.ReceiveAddress)).ToList();
 
             Console.WriteLine(cliWallet);
 
