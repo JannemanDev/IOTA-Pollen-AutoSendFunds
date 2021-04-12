@@ -1,11 +1,11 @@
-﻿function postAddressViewModel(jsonAddressViewModel) {
+﻿function postAddress(jsonAddressRequestModel) {
     console.log("starting post address");
     var response;
     $.when($.ajax({
         type: "POST",
         dataType: "json",
         contentType: 'application/json',
-        data: jsonAddressViewModel,
+        data: jsonAddressRequestModel,
         async: false, //important!
         url: "https://localhost:44383/api/address/",
         cache: false

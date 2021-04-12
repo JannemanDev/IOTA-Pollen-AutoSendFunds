@@ -1,27 +1,32 @@
 [
-    {
-        "OwnerName": "Anonymous",
-        "AddressValue": "1FkUQ2gAXRURsYYeX5G1MxJoKtH5LVkzPNijqyYSHu4wL",
-        "IsReceive": true
-    },
-    {
-        "OwnerName": "Janneman (cli)",
-        "AddressValue": "1CQ5smg31UXYEYRjxKZPfK9jqTs2Y2K2e8dLv1qAVfjQm",
-        "IsReceive": true
-    },
-    {
-        "OwnerName": "Anonymous",
-        "AddressValue": "1AA8B93ueJCiLRnghtgeJFMoMCAuNh6xisDpCoMSPMs8x",
-        "IsReceive": true
-    },
-    {
-        "OwnerName": "Anonymous",
-        "AddressValue": "1CC1K6gTZC7xmtsVSKtodou1mJBcsoW1aRMZPGAx1i1oD",
-        "IsReceive": true
-    },
-    {
-        "OwnerName": "Offline",
-        "AddressValue": "17PswqJKxPtMnJjqiJ5M4hdsDN52gKGSyAMe9SqY1EizC",
-        "IsReceive": true
-    }
+  {
+    "OwnerName": "Anonymous",
+    "AddressValue": "1FkUQ2gAXRURsYYeX5G1MxJoKtH5LVkzPNijqyYSHu4wL",
+    "IsReceive": true,
+    "IsVerified": false
+  },
+  {
+    "OwnerName": "Janneman (cli)",
+    "AddressValue": "1CQ5smg31UXYEYRjxKZPfK9jqTs2Y2K2e8dLv1qAVfjQm",
+    "IsReceive": true,
+    "IsVerified": false
+  },
+  {
+    "OwnerName": "Anonymous2",
+    "AddressValue": "1AA8B93ueJCiLRnghtgeJFMoMCAuNh6xisDpCoMSPMs8x",
+    "IsReceive": true,
+    "IsVerified": false
+  },
+  {
+    "OwnerName": "Anonymous",
+    "AddressValue": "1CC1K6gTZC7xmtsVSKtodou1mJBcsoW1aRMZPGAx1i1oD",
+    "IsReceive": true,
+    "IsVerified": false
+  },
+  {
+    "OwnerName": "Offline",
+    "AddressValue": "17PswqJKxPtMnJjqiJ5M4hdsDN52gKGSyAMe9SqY1EizC",
+    "IsReceive": true,
+    "IsVerified": false
+  }
 ]

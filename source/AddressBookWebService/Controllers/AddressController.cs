@@ -45,15 +45,17 @@ namespace AddressBookWebService.Controllers
             return _addressService.GetAllAddresses().Single(address => address.AddressValue == addressValue);
         }
 
-        [HttpGet("validate/{addressValue}")]
-        public AddressVerification Validate(string addressValue)
+        [HttpGet("isiotaaddress/{addressValue}")]
+        public bool IsIotaAddress(string addressValue)
         {
-            bool result;
-            result = Address.IsIotaAddress(addressValue);
-            if (!result) return new AddressVerification(false, "Not a valid IOTA address!");
-            result = _addressService.AddressExist(addressValue);
-            if (!result) return new AddressVerification(false, "Address not available!");
-            else return new AddressVerification(true, "");
+            return Address.IsIotaAddress(addressValue);
+        }
+
+
+        [HttpGet("addressexist/{addressValue}")]
+        public bool AddressExist(string addressValue)
+        {
+            return _addressService.AddressExist(addressValue);
         }
 
         // POST api/<AddressController>

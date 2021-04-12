@@ -13,6 +13,7 @@ namespace AddressBookWebService.ViewModels
 
         [Required(ErrorMessage = "Address is required!")]
         [IotaAddress]
+        [AddressExist]
         public string AddressValue { get; set; }
     }
 }

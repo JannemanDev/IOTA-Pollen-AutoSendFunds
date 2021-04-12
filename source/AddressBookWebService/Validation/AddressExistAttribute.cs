@@ -8,20 +8,20 @@ using SharedLib;
 
 namespace AddressBookWebService.Validation
 {
-    public class IotaAddressAttribute : ValidationAttribute, IClientModelValidator
+    public class AddressExistAttribute : ValidationAttribute, IClientModelValidator
     {
         protected override ValidationResult IsValid (object value, ValidationContext validationContext)
         {
             string addressValue = value.ToString();
             bool result = Address.IsIotaAddress(addressValue);
             if (result) return ValidationResult.Success;
-            else return new ValidationResult("Invalid address");
+            else return new ValidationResult("Addres not found!");
         }
 
         void IClientModelValidator.AddValidation(ClientModelValidationContext context)
         {
-            //context.Attributes.Add("data-val", "true");
-            context.Attributes.Add("data-val-iotaaddress", "Invalid address");
+            context.Attributes.Add("data-val", "true");
+            context.Attributes.Add("data-val-addressexist", "Addres not found!");
         }
     }
 }

@@ -1,11 +1,11 @@
-jQuery.validator.addMethod("iotaaddress",
+jQuery.validator.addMethod("addressexist",
     function (value, element, param) {
-        console.log("starting iotaaddress");
+        console.log("starting addressexist");
         var response;
         $.when($.ajax({
             type: "GET",
             async: false, //important!
-            url: "https://localhost:44383/api/address/isiotaaddress/" + value,
+            url: "https://localhost:44383/api/address/addressexist/" + value,
             cache: false
         })).done(function (data, textStatus, jqXHR) {
             console.log("background call done. Response: " + data);
@@ -16,9 +16,9 @@ jQuery.validator.addMethod("iotaaddress",
         if (response) $("#addressSubmit").removeAttr("disabled");
         else $("#addressSubmit").prop("disabled", true);
 
-        console.log("finished iotaaddress " + response);
+        console.log("finished addressexist" + response);
 
         return response;
     });
 
-jQuery.validator.unobtrusive.adapters.addBool("iotaaddress");
+jQuery.validator.unobtrusive.adapters.addBool("addressexist");

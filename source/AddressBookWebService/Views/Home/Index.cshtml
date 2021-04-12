@@ -14,13 +14,13 @@
             <tr>
                 <td><label asp-for="OwnerName"></label></td>
                 <td class="text-left">
-                    <input asp-for="OwnerName" value="@Model.OwnerName" /><span asp-validation-for="OwnerName" style="color: red"></span>
+                    <input asp-for="OwnerName" value="@Model.OwnerName" />&nbsp;<span asp-validation-for="OwnerName" style="color: red"></span>
                 </td>
             </tr>
             <tr>
                 <td><label asp-for="AddressValue">Address*</label></td>
                 <td class="text-left">
-                    <input asp-for="AddressValue" value="@Model.AddressValue" /><span asp-validation-for="AddressValue" style="color: red"></span>
+                    <input asp-for="AddressValue" value="@Model.AddressValue" />&nbsp;<span asp-validation-for="AddressValue" style="color: red"></span>
                 </td>
             </tr>
             <tr>
@@ -30,11 +30,11 @@
         </table>
         @if (@ViewBag.Updated != null && @ViewBag.Updated)
         {
-        <p class="text-left" style="color: green">Updated address</p>
+            <p class="text-left" style="color: green">Updated address</p>
         }
         else if (@ViewBag.Updated != null && !@ViewBag.Updated)
         {
-        <p class="text-left" style="color: green">Added address</p>
+            <p class="text-left" style="color: green">Added address</p>
         }
         <hr />
     </form>
@@ -56,17 +56,17 @@
             </tr>
             @foreach (Address address in @ViewBag.Addresses)
             {
-        <tr>
-            <td class="text-left">
-                @Html.DisplayFor(modelItem => address.OwnerName)
-            </td>
-            <td class="text-left">
-                @Html.DisplayFor(modelItem => address.AddressValue)
-            </td>
-            <td class="text-center">
-                @Html.DisplayFor(modelItem => address.IsVerified)
-            </td>
-        </tr>
+                <tr>
+                    <td class="text-left">
+                        @Html.DisplayFor(modelItem => address.OwnerName)
+                    </td>
+                    <td class="text-left">
+                        @Html.DisplayFor(modelItem => address.AddressValue)
+                    </td>
+                    <td class="text-center">
+                        @Html.DisplayFor(modelItem => address.IsVerified)
+                    </td>
+                </tr>
             }
         </table>
     }
