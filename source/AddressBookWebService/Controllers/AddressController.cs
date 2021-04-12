@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AddressBookWebService.ViewModels;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using SharedLib;
 using SharedLib.Services;
 
@@ -46,16 +47,16 @@ namespace AddressBookWebService.Controllers
         }
 
         [HttpGet("isiotaaddress/{addressValue}")]
-        public bool IsIotaAddress(string addressValue)
+        public AddressVerification IsIotaAddress(string addressValue)
         {
-            return Address.IsIotaAddress(addressValue);
+            return new AddressVerification(Address.IsIotaAddress(addressValue));
         }
 
 
         [HttpGet("addressexist/{addressValue}")]
-        public bool AddressExist(string addressValue)
+        public AddressVerification AddressExist(string addressValue)
         {
-            return _addressService.AddressExist(addressValue);
+            return new AddressVerification((_addressService.AddressExist(addressValue)));
         }
 
         // POST api/<AddressController>
