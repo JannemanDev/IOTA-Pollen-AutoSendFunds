@@ -30,11 +30,11 @@ NuGet packages used:
 
 See \bin\Release\net5.0\publish  
 Run for your platform for example:  
-Windows: IOTA-Pollen-AutoSendFunds.exe [settingsFile]  
-Linux: IOTA-Pollen-AutoSendFunds [settingsFile]  
+Windows: `IOTA-Pollen-AutoSendFunds.exe [settingsFile]`  
+Linux: `IOTA-Pollen-AutoSendFunds [settingsFile]`  
 
-settingsFile is optional, by default `settings.json` from current directory will be used
-An example `settings.json` is supplied
+settingsFile is optional, by default `settings.json` from current directory will be used.  
+An example `settings.json` is supplied.
 
 When using the application:  
  Press escape to quit  
@@ -106,5 +106,3 @@ If false this will be done sequentially.
 Time to wait in seconds for requesting funds to complete
 
 ## Roadmap / to do
-
--When funds are low automatically request funds from the faucet
