@@ -11,7 +11,7 @@
   "MaxAmountToSend": 1,
   "TokensToSent": [ "IOTA", "Bla" ],
   "StopWhenNoBalanceWithCreditIsAvailable": true,
-  "WaitingTimeInSecondsBetweenTransactions": 0,
+  "WaitingTimeInSecondsBetweenTransactions": 10,
   "WaitForPreviousTransactionToFinish": true,
   "ShowOutputCliWallet": true,
   "PickRandomDestinationAddress": true,

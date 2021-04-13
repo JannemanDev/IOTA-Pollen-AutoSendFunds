@@ -1,32 +1,15 @@
 [
   {
-    "OwnerName": "Anonymous",
-    "AddressValue": "1FkUQ2gAXRURsYYeX5G1MxJoKtH5LVkzPNijqyYSHu4wL",
+    "OwnerName": "Jan - wallet 1",
+    "AddressValue": "1DqsYDdEchGhsCNrvvFvK5wKR5nNaJKAHSZgxoPXYTtgY",
     "IsReceive": true,
-    "IsVerified": false
+    "IsVerified": true
   },
   {
-    "OwnerName": "Janneman (cli)",
-    "AddressValue": "1CQ5smg31UXYEYRjxKZPfK9jqTs2Y2K2e8dLv1qAVfjQm",
+    "OwnerName": "Jan - wallet 2",
+    "AddressValue": "16Wo1cCxLShdk9ojep2USA9vkFGyvGYumTvmmD7dtYcbD",
     "IsReceive": true,
-    "IsVerified": false
+    "IsVerified": true
   },
-  {
-    "OwnerName": "Anonymous2",
-    "AddressValue": "1AA8B93ueJCiLRnghtgeJFMoMCAuNh6xisDpCoMSPMs8x",
-    "IsReceive": true,
-    "IsVerified": false
-  },
-  {
-    "OwnerName": "Anonymous",
-    "AddressValue": "1CC1K6gTZC7xmtsVSKtodou1mJBcsoW1aRMZPGAx1i1oD",
-    "IsReceive": true,
-    "IsVerified": false
-  },
-  {
-    "OwnerName": "Offline",
-    "AddressValue": "17PswqJKxPtMnJjqiJ5M4hdsDN52gKGSyAMe9SqY1EizC",
-    "IsReceive": true,
-    "IsVerified": false
-  }
+
 ]

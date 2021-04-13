@@ -16,10 +16,21 @@ using SimpleBase;
 /*
  * Alternatieve node: http://45.83.107.51:8080/
  *
+ * not in sync error afvangen / rekening mee houden
+ *
+ * check of alle transacties opgeteld kloppen met balance?
+ * na trans wachten totdat 1 balance ok is
+ * of kan je terwijl pend is versturen?
+ * check balance voordat amount verzint en verstuurd
+ *
+ * output headers wegparsen ? bijv. bij Balance opvragen via dashboard
+ * error: weghalen indien geen error!
+ *
  * auto wallet create
  * auto (re)request funds
  * make an option for: use same receive adress or use unspent adres
  * save wallet address in api repo
+ * v bij wegschrijven json eerst opmaken
 
  * Netwerkversion en versie bewaren en alles hieraan hangen (log, nodes, ...)
  *      
@@ -122,14 +133,29 @@ namespace IOTA_Pollen_AutoSendFunds
             }
 
             //write settings back
-            File.WriteAllText(settingsFile, JsonConvert.SerializeObject(settings));
+            File.WriteAllText(settingsFile, JsonConvert.SerializeObject(settings, Formatting.Indented));
 
             lockFile = MiscUtil.DefaultLockFile(cliWalletConfigFolder);
             //check if program already started for this wallet by checking for lockfile
             if (File.Exists(lockFile))
             {
-                Console.WriteLine($"Program already running for this wallet: {settings.CliWalletFullpath}");
-                CleanExit(1);
+                bool found = true;
+                try
+                {
+                    int id = Convert.ToInt32(File.ReadAllText(lockFile));
+                    Process.GetProcessById(id);
+                }
+                catch
+                {
+                    found = false;
+                }
+
+                if (found)
+                {
+                    Console.WriteLine($"Program already running for this wallet: {settings.CliWalletFullpath}");
+                    CleanExit(1);
+                }
+                else File.Delete(lockFile);
             }
 
             //create lockfile to prevent running multiple program instances for same wallet
@@ -169,6 +195,7 @@ namespace IOTA_Pollen_AutoSendFunds
             while (true)
             {
                 Balance balance;
+                bool resultRequestFunds = true;
                 do
                 {
                     //pick random token
@@ -189,10 +216,12 @@ namespace IOTA_Pollen_AutoSendFunds
                         }
                         else
                         {
-                            await cliWallet.RequestFunds();
+                            resultRequestFunds = await cliWallet.RequestFunds();
                         }
                     }
                 } while (balance == null);
+
+                if (!resultRequestFunds) CleanExit(1);
 
                 //random amount respecting available balanceValue
                 int min = Math.Min(settings.MinAmountToSend, balance.BalanceValue);

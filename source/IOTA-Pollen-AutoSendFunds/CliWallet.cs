@@ -128,7 +128,7 @@ namespace IOTA_Pollen_AutoSendFunds
             }
         }
 
-        public async Task RequestFunds()
+        public async Task<bool> RequestFunds()
         {
             UpdateBalances();
 
@@ -148,7 +148,7 @@ namespace IOTA_Pollen_AutoSendFunds
             if (commandLine.Result.ExitCode != 0)
             {
                 Console.WriteLine("Failed!");
-                return;
+                return false;
             }
 
             Console.WriteLine("Request complete... now waiting for IOTA tokens to arrive....");
@@ -175,6 +175,8 @@ namespace IOTA_Pollen_AutoSendFunds
                 balance.BalanceValue > balanceAtStart)));
 
             if (failed) Console.WriteLine($"Requesting IOTA tokens failed to complete within {Program.settings.MaxWaitingTimeInSecondsForRequestingFunds} seconds");
+
+            return failed;
         }
 
         public override string ToString()
