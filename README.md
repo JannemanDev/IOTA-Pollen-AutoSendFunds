@@ -21,7 +21,7 @@ If you want to build it yourself you can use the buildAll.bat (Windows).
 Developed and test with Visual Studio 2019 v16.8.6 with .NET Core 5  
 
 NuGet packages used:  
-	CliWrap Version="3.3.1" - https://github.com/Tyrrrz/CliWrap  
+    CliWrap Version="3.3.1" - https://github.com/Tyrrrz/CliWrap  
     Newtonsoft.Json Version="12.0.3" - https://www.newtonsoft.com/json  
     RestSharp Version="106.11.7" - https://restsharp.dev/  
     SimpleBase Version="3.0.2" - https://www.nuget.org/packages/SimpleBase  
@@ -30,8 +30,11 @@ NuGet packages used:
 
 See \bin\Release\net5.0\publish  
 Run for your platform for example:  
-Windows: IOTA-Pollen-AutoSendFunds.exe  
-Linux: IOTA-Pollen-AutoSendFunds  
+Windows: IOTA-Pollen-AutoSendFunds.exe [settingsFile]  
+Linux: IOTA-Pollen-AutoSendFunds [settingsFile]  
+
+settingsFile is optional, by default `settings.json` from current directory will be used
+An example `settings.json` is supplied
 
 When using the application:  
  Press escape to quit  
@@ -40,37 +43,34 @@ When using the application:
  
 ## Settings - settings.json
 
-### UrlWalletReceiveAddresses
-
-Here you can find receiving address lists for different versions.  
-https://github.com/JanOonk/IOTA-Pollen-AutoSendFunds/tree/main/Receiving%20addresses
-
-In the IOTA discord server in the #goshimmer-discussion channel you can drop off your receive address.
-
-But you can use any url where receive addresses are stored as plain text.
-This needs to be 1 wallet receive address per line optionally prefixed with the name of the owner (may include spaces) and separated with tab(s).
-
-### AccessManaId
-
-Optional, by default it uses your (full) identityID which can be found on http://node.url:8080/info
-
-### ConsensusManaId
-
-Optional, by default it uses your (full) identityID which can be found on http://node.url:8080/info
-
 ### CliWalletFullpath
 
 Full path to the cli-wallet. Be sure to use the correct version. See Prerequisites.
 Double check if it runs correctly and has a balance.
+You can only run one instance of IOTA-Pollen-AutoSendFunds for each cli-wallet!
+
+### AccessManaId
+
+Optional, by default it uses your (full) identityID. For this the WebAPI setting is used from the wallet `config.json`, this points to http://node.url:8080/info
+
+### ConsensusManaId
+
+Optional, by default it uses your (full) identityID. For this the WebAPI setting is used from the wallet `config.json`, this points to http://node.url:8080/info
 
 ### UrlWalletReceiveAddresses
 
-You can use an url (http/https) 
-	"UrlWalletReceiveAddresses" : "https://raw.githubusercontent.com/JanOonk/IOTA-Pollen-AutoSendFunds/main/Pollen-0.5.1fix-Receiving-Addresses.txt",
+Two options:
+* You can use a local .json file. An example file is provided in folder `Receiving addresses`
+* Use an url which points to a .json file. For example the central AddressBook webservice where receiving wallet addresses are stored from other users located at: ...
 
-or a local file with full path.
-For example on Windows:
-	"UrlWalletReceiveAddresses" : "c:\\Temp\\Pollen-0.5.2-Receiving-Addresses-LocalDev.txt"
+### VerifyIfReceiveAddressesExist
+
+If set to true all receive addresses are checked if available and valid
+
+### GoShimmerDashboardUrl
+
+Points to a node's dashboard, by default this is http://node.url:8081. If empty the node url will be used from the wallet `config.json` with port 8081.
+The dashboard is used to check if receive addresses are available.
 
 ### MinAmountToSend and MaxAmountToSend
 
@@ -78,21 +78,19 @@ Minimal and maximal amount to be sent. A random value between these two will be 
 
 ### TokensToSent
 
-Here you can set which tokens will available to sent. From this set will be randomly chosen.
-
-### TimeoutInSecondsWhenNoBalanceWithCreditIsAvailable
-
-When there is not any positive balance availble left, there will be a waiting period before trying again. 
-This period can be used to wait for incoming funds.
-Only applicable when StopWhenNoBalanceWithCreditIsAvailable is false.
+Here you can set which tokens will be available to sent. From this set will be randomly chosen.
 
 ### StopWhenNoBalanceWithCreditIsAvailable
 
 When there is not any positive balance availble left the program will stop when set to true.
 
-### TimeoutInSecondsBetweenTransactions
+### WaitingTimeInSecondsBetweenTransactions
 
 Time to wait in seconds between transactions.
+
+### WaitForPreviousTransactionToFinish
+
+Not used currently
 
 ### ShowOutputCliWallet
 
@@ -102,6 +100,10 @@ Show output from cli-wallet
 
 If true randomly a destinationaddress, which is not owned by you, will be picked from UrlWalletReceiveAddresses.
 If false this will be done sequentially.
+
+### MaxWaitingTimeInSecondsForRequestingFunds
+
+Time to wait in seconds for requesting funds to complete
 
 ## Roadmap / to do
 
