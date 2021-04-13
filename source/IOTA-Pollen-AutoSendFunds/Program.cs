@@ -70,7 +70,7 @@ namespace IOTA_Pollen_AutoSendFunds
     {
         public static Settings settings;
 
-        //private static List<Address> wallets;
+        public static string lockFile = "";
 
         static async Task Main(string[] args)
         {
@@ -78,17 +78,70 @@ namespace IOTA_Pollen_AutoSendFunds
             Console.WriteLine(" Escape to quit");
             Console.WriteLine(" Space to pause\n");
 
-            
-            settings = MiscUtil.LoadSettings(Directory.GetCurrentDirectory());
+            if (args.Length > 1)
+            {
+                Console.WriteLine("Error in arguments!");
+                Console.WriteLine("Syntax: <program> [settingsfile]");
+                CleanExit(1);
+            }
 
-            //wallets = Test();
+            string settingsFile;
+            if (args.Length == 0)
+            {
+                string currentFolder = Directory.GetCurrentDirectory();
+                settingsFile = MiscUtil.DefaultSettingsFile(currentFolder);
+            }
+            else
+            {
+                settingsFile = args[0];
+            }
+
+            if (!File.Exists(settingsFile))
+            {
+                Console.WriteLine($"Settingsfile {settingsFile} not found!");
+                CleanExit(1);
+            }
+
+            Console.WriteLine($"Loading settings from {settingsFile}\n");
+
+            settings = MiscUtil.LoadSettings(settingsFile);
+
+            string cliWalletConfigFolder = Path.GetDirectoryName(settings.CliWalletFullpath);
+
+            //update empty default values in settings
+            // AccessManaId and ConsensusManaId
+            bool updateAccessManaId = (settings.AccessManaId.Trim() == "");
+            bool updateConsensusManaId = (settings.ConsensusManaId.Trim() == "");
+            if (updateAccessManaId || updateConsensusManaId)
+            {
+                string jsonCliWalletConfig = File.ReadAllText(MiscUtil.CliWalletConfig(cliWalletConfigFolder));
+                CliWalletConfig cliWalletConfig = JsonConvert.DeserializeObject<CliWalletConfig>(jsonCliWalletConfig);
+                string identityId = MiscUtil.GetIdentityId(cliWalletConfig.WebAPI);
+                if (updateAccessManaId) settings.AccessManaId = identityId;
+                if (updateConsensusManaId) settings.ConsensusManaId = identityId;
+            }
+
+            //write settings back
+            File.WriteAllText(settingsFile, JsonConvert.SerializeObject(settings));
+
+            lockFile = MiscUtil.DefaultLockFile(cliWalletConfigFolder);
+            //check if program already started for this wallet by checking for lockfile
+            if (File.Exists(lockFile))
+            {
+                Console.WriteLine($"Program already running for this wallet: {settings.CliWalletFullpath}");
+                CleanExit(1);
+            }
+
+            //create lockfile to prevent running multiple program instances for same wallet
+            File.WriteAllText(lockFile, Process.GetCurrentProcess().Id.ToString());
+
             CliWallet cliWallet = new CliWallet();
             await cliWallet.UpdateBalances();
 
             if (cliWallet.Balances.Count == 0)
             {
                 Console.WriteLine("No balance(s) exist! Exiting...");
-                return;
+                CleanExit(1);
             }
 
             await cliWallet.UpdateAddresses();
@@ -99,7 +152,7 @@ namespace IOTA_Pollen_AutoSendFunds
             {
                 Console.WriteLine(
                     $"No receive addresses available at {Program.settings.UrlWalletReceiveAddresses}! Exiting...");
-                return;
+                CleanExit(1);
             }
 
             //await cliWallet.RequestFunds();
@@ -115,64 +168,66 @@ namespace IOTA_Pollen_AutoSendFunds
 
             while (true)
             {
-                //pick random token
-                Balance balance = cliWallet.Balances
-                    .Where(balance => balance.BalanceValue > 0)
-                    .Where(balance =>
-                        settings.TokensToSent.Contains(balance.TokenName)) //only consider tokens from the settings
-                    .RandomElement();
-
-                if (balance == null)
+                Balance balance;
+                do
                 {
-                    Console.WriteLine(
-                        $"No non-empty balances for tokens {String.Join(", ", settings.TokensToSent)} available!");
-                    if (settings.StopWhenNoBalanceWithCreditIsAvailable)
-                    {
-                        Console.WriteLine("Exiting!");
-                        return;
-                    }
-                    else
-                    {
-                        await cliWallet.RequestFunds();
-                    }
-                }
-                else
-                {
-                    //random amount respecting available balanceValue
-                    int min = Math.Min(settings.MinAmountToSend, balance.BalanceValue);
-                    int max = Math.Min(settings.MaxAmountToSend, balance.BalanceValue);
-                    int amount = random.Next(min, max);
+                    //pick random token
+                    balance = cliWallet.Balances
+                        .Where(balance => balance.BalanceValue > 0)
+                        .Where(balance => balance.BalanceStatus == BalanceStatus.Ok)
+                        .Where(balance => settings.TokensToSent.Contains(balance.TokenName)) //only consider tokens from the settings
+                        .RandomElement();
 
-                    //pick next destination address
-                    if (settings.PickRandomDestinationAddress) //random
-                        receiveAddressIndex = random.Next(receiveAddresses.Count);
-                    else //sequential
-                        receiveAddressIndex = (receiveAddressIndex + 1) % receiveAddresses.Count;
-
-                    Address address = receiveAddresses[receiveAddressIndex];
-                    try
-                    {
-                        cliWallet.SendFunds(amount, address, balance.Color);
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e.Message);
-                        //throw;
-                    }
-
-                    if (settings.TimeoutInSecondsBetweenTransactions > 0)
+                    if (balance == null)
                     {
                         Console.WriteLine(
-                            $"\nSleeping for {settings.TimeoutInSecondsBetweenTransactions} seconds between transactions...\n");
-                        Thread.Sleep(settings.TimeoutInSecondsBetweenTransactions * 1000);
+                            $"No non-empty balances for tokens {String.Join(", ", settings.TokensToSent)} available!");
+                        if (settings.StopWhenNoBalanceWithCreditIsAvailable)
+                        {
+                            Console.WriteLine("Exiting!");
+                            CleanExit(0);
+                        }
+                        else
+                        {
+                            await cliWallet.RequestFunds();
+                        }
                     }
+                } while (balance == null);
+
+                //random amount respecting available balanceValue
+                int min = Math.Min(settings.MinAmountToSend, balance.BalanceValue);
+                int max = Math.Min(settings.MaxAmountToSend, balance.BalanceValue);
+                int amount = random.Next(min, max);
+
+                //pick next destination address
+                if (settings.PickRandomDestinationAddress) //random
+                    receiveAddressIndex = random.Next(receiveAddresses.Count);
+                else //sequential
+                    receiveAddressIndex = (receiveAddressIndex + 1) % receiveAddresses.Count;
+
+                Address address = receiveAddresses[receiveAddressIndex];
+                try
+                {
+                    await cliWallet.SendFunds(amount, address, balance.Color);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                    //throw;
+                }
+
+                if (settings.WaitingTimeInSecondsBetweenTransactions > 0)
+                {
+                    Console.WriteLine(
+                        $"\nSleeping for {settings.WaitingTimeInSecondsBetweenTransactions} seconds between transactions...\n");
+                    Thread.Sleep(settings.WaitingTimeInSecondsBetweenTransactions * 1000);
                 }
 
                 bool pause = false;
                 while (Console.KeyAvailable || (pause))
                 {
                     ConsoleKeyInfo cki = Console.ReadKey(true);
-                    if (cki.Key == ConsoleKey.Escape) return;
+                    if (cki.Key == ConsoleKey.Escape) CleanExit(0);
                     if (cki.Key == ConsoleKey.Spacebar)
                     {
                         if (pause) pause = false; //continue
@@ -189,7 +244,15 @@ namespace IOTA_Pollen_AutoSendFunds
                         Console.WriteLine(cliWallet);
                     }
                 }
+
+                await cliWallet.UpdateBalances();
             }
+        }
+
+        static void CleanExit(int exitCode = 0)
+        {
+            if (File.Exists(lockFile)) File.Delete(lockFile);
+            Environment.Exit(exitCode);
         }
     }
 }

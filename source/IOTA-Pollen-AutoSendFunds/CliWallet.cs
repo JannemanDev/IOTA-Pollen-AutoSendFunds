@@ -14,6 +14,7 @@ namespace IOTA_Pollen_AutoSendFunds
         public List<Address> Addresses { get; set; }
 
         public Address ReceiveAddress => Addresses.FirstOrDefault();
+        public Address UnspentAddress => Addresses.Single(address => !address.IsSpent);
         public List<Address> SpentAddresses => Addresses.Where(address => address.IsSpent).ToList();
 
         public CliWallet()
@@ -131,7 +132,9 @@ namespace IOTA_Pollen_AutoSendFunds
         {
             UpdateBalances();
 
-            int balanceAtStart = Balances.Where(balance => balance.TokenName.ToUpper() == "IOTA")
+            int balanceAtStart = Balances
+                .Where(balance => balance.TokenName.ToUpper() == "IOTA")
+                .Where(balance => balance.BalanceStatus == BalanceStatus.Ok)
                 .Select(balance => balance.BalanceValue)
                 .Single();
 

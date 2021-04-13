@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AddressBookWebService.ViewModels
+namespace AddressBookWebService.DTOs
 {
     public class AddressVerification
     {
