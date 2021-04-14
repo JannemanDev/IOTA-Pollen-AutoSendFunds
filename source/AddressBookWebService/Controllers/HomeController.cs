@@ -16,15 +16,13 @@ namespace AddressBookWebService.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration _config;
-        private readonly AddressService _addressService;
+        private readonly IAddressService _addressService;
 
-        public HomeController(ILogger<HomeController> logger, IConfiguration config)
+        public HomeController(ILogger<HomeController> logger, IConfiguration config, IAddressService addressService)
         {
             _logger = logger;
             _config = config;
-            string urlWalletReceiveAddresses = _config.GetValue<string>("AddressBookSettings:UrlWalletReceiveAddresses");
-            string goShimmerDashboardUrl = _config.GetValue<string>("AddressBookSettings:GoShimmerDashboardUrl");
-            _addressService = new AddressService(urlWalletReceiveAddresses, goShimmerDashboardUrl);
+            _addressService = addressService;
         }
 
         public IActionResult Index()

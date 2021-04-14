@@ -5,7 +5,7 @@ jQuery.validator.addMethod("addressexist",
         $.when($.ajax({
             type: "GET",
             async: false, //important!
-            url: "https://localhost:44383/api/address/addressexist/" + value,
+            url: hostname + "api/address/addressexist/" + value,
             cache: false
         })).done(function (data, textStatus, jqXHR) {
             console.log("background call done. Response: " + data);

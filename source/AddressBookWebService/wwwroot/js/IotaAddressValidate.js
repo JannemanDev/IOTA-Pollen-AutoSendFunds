@@ -1,11 +1,11 @@
 jQuery.validator.addMethod("iotaaddress",
     function (value, element, param) {
-        console.log("starting iotaaddress");
+        console.log("starting iotaaddress: " + hostname + "api/address/isiotaaddress/" + value);
         var response;
         $.when($.ajax({
             type: "GET",
             async: false, //important!
-            url: "https://localhost:44383/api/address/isiotaaddress/" + value,
+            url: hostname + "api/address/isiotaaddress/" + value,
             cache: false
         })).done(function (data, textStatus, jqXHR) {
             console.log("background call done. Response: " + data);

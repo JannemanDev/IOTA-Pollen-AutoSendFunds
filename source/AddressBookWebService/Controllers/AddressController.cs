@@ -50,7 +50,10 @@ namespace AddressBookWebService.Controllers
         [HttpGet("isiotaaddress/{addressValue}")]
         public AddressVerification IsIotaAddress(string addressValue)
         {
-            return new AddressVerification(Address.IsIotaAddress(addressValue));
+            bool result = Address.IsIotaAddress(addressValue);
+            string errorDescription = "";
+            if (!result) errorDescription = "Invalid address";
+            return new AddressVerification(result, errorDescription);
         }
 
 
@@ -74,7 +77,7 @@ namespace AddressBookWebService.Controllers
             //Todo: refactor isSpent
             Address address = new Address(addressViewModel.OwnerName, addressViewModel.AddressValue, true, true);
             bool updated = _addressService.AddAddress(address);
-            
+
             return new AddAddressResponse(true, "", updated);
         }
 

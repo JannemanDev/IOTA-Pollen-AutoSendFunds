@@ -125,15 +125,26 @@ namespace IOTA_Pollen_AutoSendFunds
 
             //update empty default values in settings
             // AccessManaId and ConsensusManaId
+            string jsonCliWalletConfig = File.ReadAllText(MiscUtil.CliWalletConfig(cliWalletConfigFolder));
+            CliWalletConfig cliWalletConfig = JsonConvert.DeserializeObject<CliWalletConfig>(jsonCliWalletConfig);
+
             bool updateAccessManaId = (settings.AccessManaId.Trim() == "");
             bool updateConsensusManaId = (settings.ConsensusManaId.Trim() == "");
             if (updateAccessManaId || updateConsensusManaId)
             {
-                string jsonCliWalletConfig = File.ReadAllText(MiscUtil.CliWalletConfig(cliWalletConfigFolder));
-                CliWalletConfig cliWalletConfig = JsonConvert.DeserializeObject<CliWalletConfig>(jsonCliWalletConfig);
                 string identityId = MiscUtil.GetIdentityId(cliWalletConfig.WebAPI);
                 if (updateAccessManaId) settings.AccessManaId = identityId;
                 if (updateConsensusManaId) settings.ConsensusManaId = identityId;
+            }
+
+            // GoShimmerDashboardUrl
+            if (settings.GoShimmerDashboardUrl.Trim() == "")
+            {
+                Uri myUri = new Uri(cliWalletConfig.WebAPI);
+                string scheme = myUri.Scheme;
+                if (scheme.Trim() == "") scheme = "http";
+                string host = $"{scheme}{Uri.SchemeDelimiter}{myUri.Host}:8081";
+                settings.GoShimmerDashboardUrl = host;
             }
 
             //write settings back

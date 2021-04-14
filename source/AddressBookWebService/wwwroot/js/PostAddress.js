@@ -7,7 +7,7 @@
         contentType: 'application/json',
         data: jsonAddressRequestModel,
         async: false, //important!
-        url: "https://localhost:44383/api/address/",
+        url: hostname + "api/address/",
         cache: false
     })).done(function (data, textStatus, jqXHR) {
         console.log("background call done. Response: " + data);

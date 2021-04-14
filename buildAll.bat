@@ -26,7 +26,7 @@ del /f /q /s source\AddressBookWebService\bin\*.* > nul
 rmdir /q /s source\AddressBookWebService\bin
 
 dotnet publish source\AddressBookWebService\AddressBookWebService.csproj /p:PublishProfile=source\AddressBookWebService\Properties\PublishProfiles\linux-arm.pubxml --configuration Release
-dotnet publish source\AddressBookWebService\AddressBookWebService.csproj /p:PublishProfile=source\AddressBookWebService\Properties\PublishProfiles\Linux-x64.pubxml --configuration Release
+dotnet publish source\AddressBookWebService\AddressBookWebService.csproj /p:PublishProfile=source\AddressBookWebService\Properties\PublishProfiles\linux-x64.pubxml --configuration Release
 dotnet publish source\AddressBookWebService\AddressBookWebService.csproj /p:PublishProfile=source\AddressBookWebService\Properties\PublishProfiles\osx-x64.pubxml --configuration Release
 dotnet publish source\AddressBookWebService\AddressBookWebService.csproj /p:PublishProfile=source\AddressBookWebService\Properties\PublishProfiles\win-x64.pubxml --configuration Release
 dotnet publish source\AddressBookWebService\AddressBookWebService.csproj /p:PublishProfile=source\AddressBookWebService\Properties\PublishProfiles\win-x86.pubxml --configuration Release
@@ -38,8 +38,8 @@ cd source\AddressBookWebService\bin\Release\net5.0\linux-arm\publish
 "C:\Program Files\WinRAR\rar.exe" a -r ..\..\..\..\..\..\..\Builds\AddressBookWebService-%version%-linux-arm.rar *.*
 
 cd /d "C:\MyData\Persoonlijk\IOTA\IOTA-Pollen-AutoSendFunds"
-cd source\AddressBookWebService\bin\Release\net5.0\Linux-x64\publish
-"C:\Program Files\WinRAR\rar.exe" a -r ..\..\..\..\..\..\..\Builds\AddressBookWebService-%version%-Linux-x64.rar *.*
+cd source\AddressBookWebService\bin\Release\net5.0\linux-x64\publish
+"C:\Program Files\WinRAR\rar.exe" a -r ..\..\..\..\..\..\..\Builds\AddressBookWebService-%version%-linux-x64.rar *.*
 
 cd /d "C:\MyData\Persoonlijk\IOTA\IOTA-Pollen-AutoSendFunds"
 cd source\AddressBookWebService\bin\Release\net5.0\osx-x64\publish
@@ -60,8 +60,8 @@ cd source\AutoSendFunds\bin\Release\net5.0\publish\linux-arm
 "C:\Program Files\WinRAR\rar.exe" a -r ..\..\..\..\..\..\..\Builds\AutoSendFunds-%version%-linux-arm.rar *.*
 
 cd /d "C:\MyData\Persoonlijk\IOTA\IOTA-Pollen-AutoSendFunds"
-cd source\AutoSendFunds\bin\Release\net5.0\publish\Linux-x64
-"C:\Program Files\WinRAR\rar.exe" a -r ..\..\..\..\..\..\..\Builds\AutoSendFunds-%version%-Linux-x64.rar *.*
+cd source\AutoSendFunds\bin\Release\net5.0\publish\linux-x64
+"C:\Program Files\WinRAR\rar.exe" a -r ..\..\..\..\..\..\..\Builds\AutoSendFunds-%version%-linux-x64.rar *.*
 
 cd /d "C:\MyData\Persoonlijk\IOTA\IOTA-Pollen-AutoSendFunds"
 cd source\AutoSendFunds\bin\Release\net5.0\publish\osx-x64
@@ -74,3 +74,6 @@ cd source\AutoSendFunds\bin\Release\net5.0\publish\win-x64
 cd /d "C:\MyData\Persoonlijk\IOTA\IOTA-Pollen-AutoSendFunds"
 cd source\AutoSendFunds\bin\Release\net5.0\publish\win-x86
 "C:\Program Files\WinRAR\rar.exe" a -r ..\..\..\..\..\..\..\Builds\AutoSendFunds-%version%-win-x86.rar *.*
+
+
+cd /d "C:\MyData\Persoonlijk\IOTA\IOTA-Pollen-AutoSendFunds"

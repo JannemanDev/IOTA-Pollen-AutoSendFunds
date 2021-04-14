@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@using System.Web
+@using Microsoft.AspNetCore.Http.Extensions
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -46,5 +48,9 @@
     <script src="~/js/AddressExistValidate.js"></script>
     <script src="~/js/PostAddress.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script type="text/javascript">
+        var hostname = '@($"{Context.Request.Scheme}://{Context.Request.Host.Value}{Url.Content("~/")}")';
+    </script>
 </body>
 </html>

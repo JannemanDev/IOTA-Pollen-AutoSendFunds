@@ -33,7 +33,11 @@ namespace SharedLib.Services
                 IRestResponse response = client.Get(request);
                 json = response.Content;
             }
-            else json = File.ReadAllText(_addressUrl); //local file
+            else
+            {
+                if (!File.Exists(_addressUrl)) json = "[]";
+                else json = File.ReadAllText(_addressUrl); //local file
+            }
             HashSet<Address> receiveAddresses = JsonConvert.DeserializeObject<HashSet<Address>>(json);
 
             if (verifyIfReceiveAddressesExist)
