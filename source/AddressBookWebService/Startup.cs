@@ -26,9 +26,9 @@ namespace AddressBookWebService
         {
             services.AddControllersWithViews();
 
-            string urlWalletReceiveAddresses = Configuration.GetValue<string>("AddressBookSettings:UrlWalletReceiveAddresses");
+            string filenameWhereToStoreReceiveAddresses = Configuration.GetValue<string>("AddressBookSettings:FilenameWhereToStoreReceiveAddresses");
             string goShimmerDashboardUrl = Configuration.GetValue<string>("AddressBookSettings:GoShimmerDashboardUrl");
-            services.AddSingleton<IAddressService>(x => new AddressService(urlWalletReceiveAddresses, goShimmerDashboardUrl));
+            services.AddSingleton<IAddressService>(x => new AddressService(filenameWhereToStoreReceiveAddresses, goShimmerDashboardUrl));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

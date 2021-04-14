@@ -48,7 +48,7 @@ namespace AddressBookWebService.Controllers
             addressViewModel.OwnerName = addressViewModel.OwnerName.Trim();
             if (addressViewModel.OwnerName == "") addressViewModel.OwnerName = "Anonymous";
 
-            Address address = new Address(addressViewModel.OwnerName, addressViewModel.AddressValue, true);
+            Address address = new Address(addressViewModel.OwnerName, addressViewModel.AddressValue, true, true);
             ViewBag.Updated = (Boolean)_addressService.AddAddress(address);
 
             ViewBag.Addresses = _addressService.GetAllAddresses();

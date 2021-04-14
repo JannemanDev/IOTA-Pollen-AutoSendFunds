@@ -1,15 +1,14 @@
 [
   {
-    "OwnerName": "Jan - wallet 1",
+    "OwnerName": "Yourself",
     "AddressValue": "1DqsYDdEchGhsCNrvvFvK5wKR5nNaJKAHSZgxoPXYTtgY",
-    "IsReceive": true,
+    "IsSpent": true,
     "IsVerified": true
   },
   {
-    "OwnerName": "Jan - wallet 2",
+    "OwnerName": "Yourself",
     "AddressValue": "16Wo1cCxLShdk9ojep2USA9vkFGyvGYumTvmmD7dtYcbD",
-    "IsReceive": true,
+    "IsSpent": true,
     "IsVerified": true
-  },
-
+  }
 ]

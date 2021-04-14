@@ -3,13 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31019.35
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dashboard-AutoSendFunds", "IOTA-Pollen-AutoSendFunds\Dashboard-AutoSendFunds.csproj", "{494888D4-4F6C-44E4-B13F-5D6BAD992293}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AutoSendFunds", "AutoSendFunds\AutoSendFunds.csproj", "{494888D4-4F6C-44E4-B13F-5D6BAD992293}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AddressBookWebService", "AddressBookWebService\AddressBookWebService.csproj", "{7A7AA4BB-392D-40BE-BE9E-BCBDBBCC386D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedLib", "SharedLib\SharedLib.csproj", "{99A0EAB9-C04C-4C14-835B-FB35E01C8494}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogViewer", "LogViewer\LogViewer.csproj", "{271D21C6-94FA-4BE3-8526-FC5AE02A5BC8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +27,6 @@ Global
 		{99A0EAB9-C04C-4C14-835B-FB35E01C8494}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{99A0EAB9-C04C-4C14-835B-FB35E01C8494}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{99A0EAB9-C04C-4C14-835B-FB35E01C8494}.Release|Any CPU.Build.0 = Release|Any CPU
-		{271D21C6-94FA-4BE3-8526-FC5AE02A5BC8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{271D21C6-94FA-4BE3-8526-FC5AE02A5BC8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{271D21C6-94FA-4BE3-8526-FC5AE02A5BC8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{271D21C6-94FA-4BE3-8526-FC5AE02A5BC8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

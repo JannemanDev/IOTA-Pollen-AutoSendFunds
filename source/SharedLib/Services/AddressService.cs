@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RestSharp;
 using SharedLib;
 
@@ -27,7 +28,7 @@ namespace SharedLib.Services
             if (_addressUrl.ToUpper().StartsWith("HTTP://") || _addressUrl.ToUpper().StartsWith("HTTPS://"))
             {
                 var client = new RestClient(_addressUrl);
-                var request = new RestRequest("", DataFormat.None);
+                var request = new RestRequest("/api/address/all", DataFormat.None);
 
                 IRestResponse response = client.Get(request);
                 json = response.Content;
@@ -51,14 +52,31 @@ namespace SharedLib.Services
             HashSet<Address> addresses = GetAllAddresses();
             Address addressFound;
             bool updated = false;
-            if (addresses.Contains(address))
+            string json;
+
+            if (_addressUrl.ToUpper().StartsWith("HTTP://") || _addressUrl.ToUpper().StartsWith("HTTPS://"))
             {
-                addresses.Remove(address);
-                updated = true;
+                var client = new RestClient(_addressUrl);
+                var request = new RestRequest("/api/address", DataFormat.None);
+                json = JsonConvert.SerializeObject(address, Formatting.Indented);
+                request.AddJsonBody(json);
+                IRestResponse response = client.Post(request);
+                json = response.Content;
+                JObject obj = JObject.Parse(json);
+
+                return (bool)obj["updated"];
             }
-            addresses.Add(address);
-            string json = JsonConvert.SerializeObject(addresses, Formatting.Indented);
-            File.WriteAllText(_addressUrl, json);
+            else
+            {
+                if (addresses.Contains(address))
+                {
+                    addresses.Remove(address);
+                    updated = true;
+                }
+                addresses.Add(address);
+                json = JsonConvert.SerializeObject(addresses, Formatting.Indented);
+                File.WriteAllText(_addressUrl, json);
+            }
 
             return updated;
         }

@@ -29,10 +29,17 @@ namespace SharedLib
             IsSpent = isSpent;
         }
 
+        ////Todo: is this correct? other constructor now isVerified is used?
+        //public Address(string ownerName, string addressValue, bool isSpent) : this(addressValue, isSpent)
+        //{
+        //    OwnerName = ownerName;
+        //}
+
         [JsonConstructor]
-        public Address(string ownerName, string addressValue, bool isSpent) : this(addressValue, isSpent)
+        public Address(string ownerName, string addressValue, bool isSpent, bool isVerified) : this(addressValue, isSpent)
         {
             OwnerName = ownerName;
+            IsVerified = isVerified;
         }
 
         public override string ToString()

@@ -1,0 +1,19 @@
+{
+  "LogFileTransactions": "",
+  "PublishReceiveAddress": true,
+  "CliWalletFullpath": "c:\\temp\\iota\\newwallet2\\cli-wallet.exe",
+  "AccessManaId": "",
+  "ConsensusManaId": "",
+  "UrlWalletReceiveAddresses": "https://localhost:5001/",
+  "VerifyIfReceiveAddressesExist": false,
+  "GoShimmerDashboardUrl": "http://192.168.11.57:8081",
+  "MinAmountToSend": 1,
+  "MaxAmountToSend": 1,
+  "TokensToSent": [ "IOTA", "Bla" ],
+  "StopWhenNoBalanceWithCreditIsAvailable": true,
+  "WaitingTimeInSecondsBetweenTransactions": 10,
+  "WaitForPreviousTransactionToFinish": true,
+  "ShowOutputCliWallet": true,
+  "PickRandomDestinationAddress": true,
+  "MaxWaitingTimeInSecondsForRequestingFunds": 60
+}

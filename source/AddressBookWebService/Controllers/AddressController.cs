@@ -62,9 +62,20 @@ namespace AddressBookWebService.Controllers
 
         // POST api/<AddressController>
         [HttpPost]
-        public void Post(AddressViewModel addressViewModel)
+        public AddAddressResponse Post(AddressViewModel addressViewModel)
         {
-            Console.WriteLine("test");
+            Console.WriteLine("POST /api/address");
+
+            if (!ModelState.IsValid)
+            {
+                return new AddAddressResponse(false, "Not a valid AddressViewModel!", false);
+            }
+
+            //Todo: refactor isSpent
+            Address address = new Address(addressViewModel.OwnerName, addressViewModel.AddressValue, true, true);
+            bool updated = _addressService.AddAddress(address);
+            
+            return new AddAddressResponse(true, "", updated);
         }
 
         // PUT api/<AddressController>/5
