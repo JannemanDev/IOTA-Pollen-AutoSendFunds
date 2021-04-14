@@ -18,7 +18,7 @@ jQuery.validator.addMethod("iotaaddress",
 
         console.log("finished iotaaddress " + response);
 
-        return response;
+        return response.result;
     });
 
 jQuery.validator.unobtrusive.adapters.addBool("iotaaddress");

@@ -1,6 +1,6 @@
 jQuery.validator.addMethod("addressexist",
     function (value, element, param) {
-        console.log("starting addressexist");
+        console.log("starting addressexist: " + hostname + "api/address/addressexist/" + value);
         var response;
         $.when($.ajax({
             type: "GET",
@@ -18,7 +18,7 @@ jQuery.validator.addMethod("addressexist",
 
         console.log("finished addressexist" + response);
 
-        return response;
+        return response.result;
     });
 
 jQuery.validator.unobtrusive.adapters.addBool("addressexist");
