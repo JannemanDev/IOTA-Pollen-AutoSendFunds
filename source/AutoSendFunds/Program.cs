@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using CliWrap;
 using IOTA_Pollen_AutoSendFunds.ExtensionMethods;
 using Newtonsoft.Json;
 using RestSharp;
@@ -14,18 +16,17 @@ using SharedLib.Services;
 using SimpleBase;
 
 /*
+
+ * Default settings file meeleveren
+ *
  * Alternatieve node: http://45.83.107.51:8080/
  *
- * iaddresservice gebruiken ipv addressservice in addressbookservice! zie AddressService constructor references!
  * refactor: new Address moet een isspent hebben wat in regel 51 homecontroller niet bekend is
  * walletname (for new address()): if empty generate autoname
  *
  * not in sync error afvangen / rekening mee houden
  *
  * check of alle transacties opgeteld kloppen met balance?
- * na trans wachten totdat 1 balance ok is
- * of kan je terwijl pend is versturen?
- * check balance voordat amount verzint en verstuurd
  *
  * output headers wegparsen ? bijv. bij Balance opvragen via dashboard
  * error: weghalen indien geen error!
@@ -117,14 +118,23 @@ namespace IOTA_Pollen_AutoSendFunds
                 CleanExit(1);
             }
 
+            //settingsFile = "c:\\temp\\iota\\newwallet3\\settings.json"; //override for testing purposes
+
             Console.WriteLine($"Loading settings from {settingsFile}\n");
 
             settings = MiscUtil.LoadSettings(settingsFile);
 
+            //first check if wallet exist
+            if (!CliWallet.Exist(settings.CliWalletFullpath))
+            {
+                Console.WriteLine($"Wallet not found! File does not exist: {CliWallet.DefaultWalletFile(settings.CliWalletFullpath)}");
+                CleanExit(1);
+            }
+
             string cliWalletConfigFolder = Path.GetDirectoryName(settings.CliWalletFullpath);
 
             //update empty default values in settings
-            // AccessManaId and ConsensusManaId
+            // 1. AccessManaId and ConsensusManaId
             string jsonCliWalletConfig = File.ReadAllText(MiscUtil.CliWalletConfig(cliWalletConfigFolder));
             CliWalletConfig cliWalletConfig = JsonConvert.DeserializeObject<CliWalletConfig>(jsonCliWalletConfig);
 
@@ -137,7 +147,7 @@ namespace IOTA_Pollen_AutoSendFunds
                 if (updateConsensusManaId) settings.ConsensusManaId = identityId;
             }
 
-            // GoShimmerDashboardUrl
+            // 2. GoShimmerDashboardUrl
             if (settings.GoShimmerDashboardUrl.Trim() == "")
             {
                 Uri myUri = new Uri(cliWalletConfig.WebAPI);
@@ -176,19 +186,25 @@ namespace IOTA_Pollen_AutoSendFunds
             //create lockfile to prevent running multiple program instances for same wallet
             File.WriteAllText(lockFile, Process.GetCurrentProcess().Id.ToString());
 
+            //Todo: temporary solution for error: "The SSL connection could not be established, see inner exception."
+            //       when using RestSharp.
+            //      Postman generates a warning: "Unable to verify the first certificate"
+            ServicePointManager.ServerCertificateValidationCallback +=
+                (sender, certificate, chain, sslPolicyErrors) => true;
+            
             CliWallet cliWallet = new CliWallet();
             await cliWallet.UpdateBalances();
 
-            if (cliWallet.Balances.Count == 0)
-            {
-                Console.WriteLine("No balance(s) exist! Exiting...");
-                CleanExit(1);
-            }
+            //if (cliWallet.Balances.Count == 0)
+            //{
+            //    Console.WriteLine("No balance(s) exist! Exiting...");
+            //    CleanExit(1);
+            //}
 
             await cliWallet.UpdateAddresses();
 
             AddressService addressService = new AddressService(Program.settings.UrlWalletReceiveAddresses, Program.settings.GoShimmerDashboardUrl);
-            
+
             if (settings.PublishReceiveAddress) addressService.AddAddress(cliWallet.ReceiveAddress);
 
             List<Address> receiveAddresses = addressService.GetAllAddresses(Program.settings.VerifyIfReceiveAddressesExist).ToList();
@@ -202,7 +218,7 @@ namespace IOTA_Pollen_AutoSendFunds
                     $"No other receive addresses available at {Program.settings.UrlWalletReceiveAddresses}! Exiting...");
                 CleanExit(1);
             }
-            
+
             Console.WriteLine(cliWallet);
 
             Random random = new Random();
@@ -210,21 +226,27 @@ namespace IOTA_Pollen_AutoSendFunds
 
             while (true)
             {
-                Balance balance;
+                var balance = new { Color = "", Value = 0 }; //init to make compiler happy
                 bool resultRequestFunds = true;
                 do
                 {
                     //pick random token
                     balance = cliWallet.Balances
-                        .Where(balance => balance.BalanceValue > 0)
-                        .Where(balance => balance.BalanceStatus == BalanceStatus.Ok)
+                        //.Where(balance => balance.BalanceStatus == BalanceStatus.Ok)
                         .Where(balance => settings.TokensToSent.Contains(balance.TokenName)) //only consider tokens from the settings
+                        .GroupBy(balance => balance.Color)  //groupby Color (which is unique)
+                        .Select(group => new
+                        { //sum all ok/pend balances for each token
+                            Color = group.Key,
+                            Value = group.Sum(x => x.BalanceValue)
+                        })
+                        .Where(colorToken => colorToken.Value > settings.MinAmountToSend) //only with enough balance
                         .RandomElement();
 
                     if (balance == null)
                     {
-                        Console.WriteLine(
-                            $"No non-empty balances for tokens {String.Join(", ", settings.TokensToSent)} available!");
+                        Console.WriteLine($"None of these tokens {String.Join(", ", settings.TokensToSent)} have a balance with at least {settings.MinAmountToSend}!");
+
                         if (settings.StopWhenNoBalanceWithCreditIsAvailable)
                         {
                             Console.WriteLine("Exiting!");
@@ -240,8 +262,8 @@ namespace IOTA_Pollen_AutoSendFunds
                 if (!resultRequestFunds) CleanExit(1);
 
                 //random amount respecting available balanceValue
-                int min = Math.Min(settings.MinAmountToSend, balance.BalanceValue);
-                int max = Math.Min(settings.MaxAmountToSend, balance.BalanceValue);
+                int min = Math.Min(settings.MinAmountToSend, balance.Value);
+                int max = Math.Min(settings.MaxAmountToSend, balance.Value);
                 int amount = random.Next(min, max);
 
                 //pick next destination address
@@ -261,32 +283,43 @@ namespace IOTA_Pollen_AutoSendFunds
                     //throw;
                 }
 
-                if (settings.WaitingTimeInSecondsBetweenTransactions > 0)
-                {
-                    Console.WriteLine(
-                        $"\nSleeping for {settings.WaitingTimeInSecondsBetweenTransactions} seconds between transactions...\n");
-                    Thread.Sleep(settings.WaitingTimeInSecondsBetweenTransactions * 1000);
-                }
+                int remainingTimeBetweenTransactions = settings.WaitingTimeInSecondsBetweenTransactions;
 
                 bool pause = false;
-                while (Console.KeyAvailable || (pause))
+                while (Console.KeyAvailable || (pause) || (remainingTimeBetweenTransactions > 0))
                 {
-                    ConsoleKeyInfo cki = Console.ReadKey(true);
-                    if (cki.Key == ConsoleKey.Escape) CleanExit(0);
-                    if (cki.Key == ConsoleKey.Spacebar)
+                    if (Console.KeyAvailable || (pause))
                     {
-                        if (pause) pause = false; //continue
-                        else
+                        ConsoleKeyInfo cki = Console.ReadKey(true);
+                        if (cki.Key == ConsoleKey.Escape) CleanExit(0);
+                        if (cki.Key == ConsoleKey.Spacebar)
                         {
-                            Console.WriteLine("Pausing... Press <space> to continue, B = Balance, <escape> to quit!");
-                            pause = true;
+                            if (pause) pause = false; //continue
+                            else
+                            {
+                                Console.WriteLine(
+                                    "Pausing... Press <space> to continue, B = Balance, <escape> to quit!");
+                                pause = true;
+                            }
+                        }
+
+                        if (cki.Key == ConsoleKey.B) //show balance
+                        {
+                            await cliWallet.UpdateBalances();
+                            Console.WriteLine(cliWallet);
                         }
                     }
 
-                    if (cki.Key == ConsoleKey.B) //show balance
+                    if (!pause && remainingTimeBetweenTransactions > 0)
                     {
-                        await cliWallet.UpdateBalances();
-                        Console.WriteLine(cliWallet);
+                        if (remainingTimeBetweenTransactions == settings.WaitingTimeInSecondsBetweenTransactions)
+                            Console.Write($"\nSleeping between transactions:");
+                        Console.Write($" {remainingTimeBetweenTransactions}");
+
+                        Thread.Sleep(1000);
+                        remainingTimeBetweenTransactions--;
+
+                        if (remainingTimeBetweenTransactions == 0) Console.WriteLine();
                     }
                 }
 

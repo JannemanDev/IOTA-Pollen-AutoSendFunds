@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -62,10 +63,15 @@ namespace SharedLib.Services
             {
                 var client = new RestClient(_addressUrl);
                 var request = new RestRequest("/api/address", DataFormat.None);
+
                 json = JsonConvert.SerializeObject(address, Formatting.Indented);
                 request.AddJsonBody(json);
+                Console.WriteLine($"{_addressUrl} request:{json}");
                 IRestResponse response = client.Post(request);
                 json = response.Content;
+                Console.WriteLine($"json response: {json}");
+                Console.WriteLine($"{response.ErrorMessage}");
+                Console.WriteLine($"{response}");
                 JObject obj = JObject.Parse(json);
 
                 return (bool)obj["updated"];

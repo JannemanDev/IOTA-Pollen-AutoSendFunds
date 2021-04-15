@@ -1,7 +1,7 @@
 {
   "LogFileTransactions": "",
   "PublishReceiveAddress": true,
-  "CliWalletFullpath": "c:\\temp\\iota\\newwallet2\\cli-wallet.exe",
+  "CliWalletFullpath": "c:\\temp\\iota\\newwallet3\\cli-wallet.exe",
   "AccessManaId": "",
   "ConsensusManaId": "",
   "UrlWalletReceiveAddresses": "https://localhost:5001/",
@@ -10,10 +10,10 @@
   "MinAmountToSend": 1,
   "MaxAmountToSend": 1,
   "TokensToSent": [ "IOTA", "Bla" ],
-  "StopWhenNoBalanceWithCreditIsAvailable": true,
-  "WaitingTimeInSecondsBetweenTransactions": 10,
+  "StopWhenNoBalanceWithCreditIsAvailable": false,
+  "WaitingTimeInSecondsBetweenTransactions": 0,
   "WaitForPreviousTransactionToFinish": true,
-  "ShowOutputCliWallet": true,
+  "ShowOutputCliWallet": false,
   "PickRandomDestinationAddress": true,
   "MaxWaitingTimeInSecondsForRequestingFunds": 60
 }

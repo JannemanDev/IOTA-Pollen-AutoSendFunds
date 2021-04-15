@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -21,6 +22,17 @@ namespace IOTA_Pollen_AutoSendFunds
         {
             Balances = new List<Balance>();
             Addresses = new List<Address>();
+        }
+
+        public static string DefaultWalletFile(string cliWalletFullPath = "")
+        {
+            return Path.Combine(Path.GetDirectoryName(cliWalletFullPath), "wallet.dat");
+        }
+
+        public static bool Exist(string cliWalletFullPath)
+        {
+            string cliWalletFile = DefaultWalletFile(cliWalletFullPath);
+            return File.Exists(cliWalletFile);
         }
 
         public async Task UpdateBalances()
@@ -128,15 +140,22 @@ namespace IOTA_Pollen_AutoSendFunds
             }
         }
 
+        public int TotalBalanceOfTokenByColor(string color)
+        {
+            //includes Ok and Pending balances
+            int balanceAtStart = Balances
+                                    .Where(balance => balance.Color.ToUpper() == "IOTA")
+                                    .Select(balance => balance.BalanceValue)
+                                    .DefaultIfEmpty(0)
+                                    .Sum();
+            return balanceAtStart;
+        }
+
         public async Task<bool> RequestFunds()
         {
             UpdateBalances();
 
-            int balanceAtStart = Balances
-                .Where(balance => balance.TokenName.ToUpper() == "IOTA")
-                .Where(balance => balance.BalanceStatus == BalanceStatus.Ok)
-                .Select(balance => balance.BalanceValue)
-                .Single();
+            int balanceAtStart = TotalBalanceOfTokenByColor("IOTA");
 
             Console.WriteLine("\nRequesting IOTA tokens from the faucet... this takes a while...");
 
@@ -155,6 +174,7 @@ namespace IOTA_Pollen_AutoSendFunds
 
             int seconds = 0;
             bool failed = false;
+            bool firstPrintFlag = true;
             do
             {
                 if (seconds >= Program.settings.MaxWaitingTimeInSecondsForRequestingFunds)
@@ -164,19 +184,28 @@ namespace IOTA_Pollen_AutoSendFunds
                 }
 
                 Thread.Sleep(1000);
-                UpdateBalances();
+                await UpdateBalances();
 
-                if (Balances.Any(balance => balance.TokenName.ToUpper() == "IOTA" && balance.BalanceStatus == BalanceStatus.Pending))
-                    Console.WriteLine("Found pending IOTA transaction! Waiting for it to complete...");
+                if (Balances.Any(balance =>
+                    balance.TokenName.ToUpper() == "IOTA" && balance.BalanceStatus == BalanceStatus.Pending))
+                {
+                    if (firstPrintFlag)
+                    {
+                        Console.Write("Found pending IOTA transaction! Waiting for it to complete...");
+                        firstPrintFlag = false;
+                    }
+
+                    Console.Write($" {seconds}");
+                }
 
                 seconds++;
-            } while (!(Balances.Any(balance =>
-                balance.TokenName.ToUpper() == "IOTA" && balance.BalanceStatus == BalanceStatus.Ok &&
-                balance.BalanceValue > balanceAtStart)));
+            } while (TotalBalanceOfTokenByColor("IOTA") <= balanceAtStart);
+
+            if (!firstPrintFlag) Console.WriteLine();
 
             if (failed) Console.WriteLine($"Requesting IOTA tokens failed to complete within {Program.settings.MaxWaitingTimeInSecondsForRequestingFunds} seconds");
 
-            return failed;
+            return !failed;
         }
 
         public override string ToString()

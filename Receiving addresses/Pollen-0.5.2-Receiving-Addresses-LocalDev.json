@@ -1,6 +1,12 @@
 [
   {
     "OwnerName": "Yourself",
+    "AddressValue": "1CjonvjuqufEwVSi3NvfjLLTJPSBS9bijqBBgTMH7NjF8",
+    "IsSpent": true,
+    "IsVerified": true
+  },
+  {
+    "OwnerName": "Yourself",
     "AddressValue": "1DqsYDdEchGhsCNrvvFvK5wKR5nNaJKAHSZgxoPXYTtgY",
     "IsSpent": true,
     "IsVerified": true
