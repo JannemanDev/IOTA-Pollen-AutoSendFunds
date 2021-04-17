@@ -17,6 +17,7 @@ using SimpleBase;
 
 /*
  * v Show only errors / or also option(?)
+ * - AutoUpdateReceiveAddress after x seconds (in settings)
  *
  * Default settings file meeleveren
  *
@@ -95,23 +96,7 @@ namespace IOTA_Pollen_AutoSendFunds
             Console.WriteLine(" Escape to quit");
             Console.WriteLine(" Space to pause\n");
 
-            if (args.Length > 1)
-            {
-                Console.WriteLine("Error in arguments!");
-                Console.WriteLine("Syntax: <program> [settingsfile]");
-                CleanExit(1);
-            }
-
-            string settingsFile;
-            if (args.Length == 0)
-            {
-                string currentFolder = Directory.GetCurrentDirectory();
-                settingsFile = MiscUtil.DefaultSettingsFile(currentFolder);
-            }
-            else
-            {
-                settingsFile = args[0];
-            }
+            var settingsFile = ParseArguments(args);
 
             if (!File.Exists(settingsFile))
             {
@@ -132,67 +117,17 @@ namespace IOTA_Pollen_AutoSendFunds
                 CleanExit(1);
             }
 
+            await UpdateSettings(settingsFile);
+
             string cliWalletConfigFolder = Path.GetDirectoryName(settings.CliWalletFullpath);
-
-            //update empty default values in settings
-            // 1. AccessManaId and ConsensusManaId
-            string jsonCliWalletConfig = File.ReadAllText(MiscUtil.CliWalletConfig(cliWalletConfigFolder));
-            CliWalletConfig cliWalletConfig = JsonConvert.DeserializeObject<CliWalletConfig>(jsonCliWalletConfig);
-
-            bool updateAccessManaId = (settings.AccessManaId.Trim() == "");
-            bool updateConsensusManaId = (settings.ConsensusManaId.Trim() == "");
-            if (updateAccessManaId || updateConsensusManaId)
-            {
-                string identityId = MiscUtil.GetIdentityId(cliWalletConfig.WebAPI);
-                if (updateAccessManaId) settings.AccessManaId = identityId;
-                if (updateConsensusManaId) settings.ConsensusManaId = identityId;
-            }
-
-            // 2. GoShimmerDashboardUrl
-            if (settings.GoShimmerDashboardUrl.Trim() == "")
-            {
-                Uri myUri = new Uri(cliWalletConfig.WebAPI);
-                string scheme = myUri.Scheme;
-                if (scheme.Trim() == "") scheme = "http";
-                string host = $"{scheme}{Uri.SchemeDelimiter}{myUri.Host}:8081";
-                settings.GoShimmerDashboardUrl = host;
-            }
-
-            //write settings back
-            File.WriteAllText(settingsFile, JsonConvert.SerializeObject(settings, Formatting.Indented));
-
-            lockFile = MiscUtil.DefaultLockFile(cliWalletConfigFolder);
-            //check if program already started for this wallet by checking for lockfile
-            if (File.Exists(lockFile))
-            {
-                bool found = true;
-                try
-                {
-                    int id = Convert.ToInt32(File.ReadAllText(lockFile));
-                    Process.GetProcessById(id);
-                }
-                catch
-                {
-                    found = false;
-                }
-
-                if (found)
-                {
-                    Console.WriteLine($"Program already running for this wallet: {settings.CliWalletFullpath}");
-                    CleanExit(1);
-                }
-                else File.Delete(lockFile);
-            }
-
-            //create lockfile to prevent running multiple program instances for same wallet
-            await File.WriteAllTextAsync(lockFile, Environment.ProcessId.ToString());
+            await WriteLockFile(cliWalletConfigFolder);
 
             //Todo: temporary solution for error: "The SSL connection could not be established, see inner exception."
             //       when using RestSharp.
             //      Postman generates a warning: "Unable to verify the first certificate"
             ServicePointManager.ServerCertificateValidationCallback +=
                 (sender, certificate, chain, sslPolicyErrors) => true;
-            
+
             CliWallet cliWallet = new CliWallet();
             await cliWallet.UpdateAddresses();
 
@@ -219,12 +154,12 @@ namespace IOTA_Pollen_AutoSendFunds
 
             while (true)
             {
-                var balance = new { Color = "", Value = 0 }; //init to make compiler happy
+                var balancePicked = new { Color = "", Value = 0 }; //init to make compiler happy
                 bool resultRequestFunds = true;
                 do
                 {
                     //pick random token
-                    balance = cliWallet.Balances
+                    balancePicked = cliWallet.Balances
                         //.Where(balance => balance.BalanceStatus == BalanceStatus.Ok)
                         .Where(balance => settings.TokensToSent.Contains(balance.TokenName)) //only consider tokens from the settings
                         .GroupBy(balance => balance.Color)  //groupby Color (which is unique)
@@ -236,7 +171,7 @@ namespace IOTA_Pollen_AutoSendFunds
                         .Where(colorToken => colorToken.Value > settings.MinAmountToSend) //only with enough balance
                         .RandomElement();
 
-                    if (balance == null)
+                    if (balancePicked == null)
                     {
                         Console.WriteLine($"None of these tokens {String.Join(", ", settings.TokensToSent)} have a balance with at least {settings.MinAmountToSend}!");
 
@@ -250,13 +185,13 @@ namespace IOTA_Pollen_AutoSendFunds
                             resultRequestFunds = await cliWallet.RequestFunds();
                         }
                     }
-                } while (balance == null);
+                } while (balancePicked == null);
 
                 if (!resultRequestFunds) CleanExit(1);
 
                 //random amount respecting available balanceValue
-                int min = Math.Min(settings.MinAmountToSend, balance.Value);
-                int max = Math.Min(settings.MaxAmountToSend, balance.Value);
+                int min = Math.Min(settings.MinAmountToSend, balancePicked.Value);
+                int max = Math.Min(settings.MaxAmountToSend, balancePicked.Value);
                 int amount = random.Next(min, max);
 
                 //pick next destination address
@@ -266,15 +201,7 @@ namespace IOTA_Pollen_AutoSendFunds
                     receiveAddressIndex = (receiveAddressIndex + 1) % receiveAddresses.Count;
 
                 Address address = receiveAddresses[receiveAddressIndex];
-                try
-                {
-                    await CliWallet.SendFunds(amount, address, balance.Color);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                    //throw;
-                }
+                await CliWallet.SendFunds(amount, address, balancePicked.Color);
 
                 int remainingTimeBetweenTransactions = settings.WaitingTimeInSecondsBetweenTransactions;
 
@@ -318,6 +245,90 @@ namespace IOTA_Pollen_AutoSendFunds
 
                 await cliWallet.UpdateBalances();
             }
+        }
+
+        private static async Task UpdateSettings(string settingsFile)
+        {
+            string cliWalletConfigFolder = Path.GetDirectoryName(settings.CliWalletFullpath);
+
+            //update empty default values in settings
+            // 1. AccessManaId and ConsensusManaId
+            string jsonCliWalletConfig = File.ReadAllText(MiscUtil.CliWalletConfig(cliWalletConfigFolder));
+            CliWalletConfig cliWalletConfig = JsonConvert.DeserializeObject<CliWalletConfig>(jsonCliWalletConfig);
+
+            bool updateAccessManaId = (settings.AccessManaId.Trim() == "");
+            bool updateConsensusManaId = (settings.ConsensusManaId.Trim() == "");
+            if (updateAccessManaId || updateConsensusManaId)
+            {
+                string identityId = MiscUtil.GetIdentityId(cliWalletConfig.WebAPI);
+                if (updateAccessManaId) settings.AccessManaId = identityId;
+                if (updateConsensusManaId) settings.ConsensusManaId = identityId;
+            }
+
+            // 2. GoShimmerDashboardUrl
+            if (settings.GoShimmerDashboardUrl.Trim() == "")
+            {
+                Uri myUri = new Uri(cliWalletConfig.WebAPI);
+                string scheme = myUri.Scheme;
+                if (scheme.Trim() == "") scheme = "http";
+                string host = $"{scheme}{Uri.SchemeDelimiter}{myUri.Host}:8081";
+                settings.GoShimmerDashboardUrl = host;
+            }
+
+            //write settings back
+            await File.WriteAllTextAsync(settingsFile, JsonConvert.SerializeObject(settings, Formatting.Indented));
+        }
+
+        private static async Task WriteLockFile(string folder)
+        {
+            lockFile = MiscUtil.DefaultLockFile(folder);
+            //check if program already started for this wallet by checking for lockfile
+            if (File.Exists(lockFile))
+            {
+                bool found = true;
+                try
+                {
+                    int id = Convert.ToInt32(await File.ReadAllTextAsync(lockFile));
+                    Process.GetProcessById(id);
+                }
+                catch
+                {
+                    found = false;
+                }
+
+                if (found)
+                {
+                    Console.WriteLine($"Program already running for this wallet: {settings.CliWalletFullpath}");
+                    CleanExit(1);
+                }
+                else File.Delete(lockFile);
+            }
+
+            //create lockfile to prevent running multiple program instances for same wallet
+            await File.WriteAllTextAsync(lockFile, Environment.ProcessId.ToString());
+        }
+
+        private static string ParseArguments(string[] args)
+        {
+            if (args.Length > 1)
+            {
+                Console.WriteLine("Error in arguments!");
+                Console.WriteLine("Syntax: <program> [settingsfile]");
+                CleanExit(1);
+            }
+
+            string settingsFile;
+            if (args.Length == 0)
+            {
+                string currentFolder = Directory.GetCurrentDirectory();
+                settingsFile = MiscUtil.DefaultSettingsFile(currentFolder);
+            }
+            else
+            {
+                settingsFile = args[0];
+            }
+
+            return settingsFile;
         }
 
         static void CleanExit(int exitCode = 0)
