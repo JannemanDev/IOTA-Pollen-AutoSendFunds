@@ -18,12 +18,10 @@ namespace AddressBookWebService.Controllers
     [ApiController]
     public class AddressController : ControllerBase
     {
-        private readonly IConfiguration _config;
         private readonly IAddressService _addressService;
 
-        public AddressController(IConfiguration config, IAddressService addressService)
+        public AddressController(IAddressService addressService)
         {
-            _config = config;
             _addressService = addressService;
         }
 
@@ -79,18 +77,6 @@ namespace AddressBookWebService.Controllers
             bool updated = _addressService.AddAddress(address);
 
             return new AddAddressResponse(true, "", updated);
-        }
-
-        // PUT api/<AddressController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<AddressController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
         }
     }
 }

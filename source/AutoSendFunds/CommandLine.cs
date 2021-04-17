@@ -17,8 +17,8 @@ namespace IOTA_Pollen_AutoSendFunds
 
         public BufferedCommandResult Result { get; set; }
 
-        private string filename;
-        private string arguments;
+        private readonly string filename;
+        private readonly string arguments;
         private Command command;
 
         public CommandLine(string filename, string arguments)
@@ -51,8 +51,12 @@ namespace IOTA_Pollen_AutoSendFunds
                 Console.WriteLine($"{command.TargetFilePath} {command.Arguments}");
                 Console.WriteLine("OUTPUT:");
                 Console.WriteLine(standardOutput);
-                Console.WriteLine("ERROR:");
-                Console.WriteLine(errorOutput);
+
+                if (errorOutput.Trim() != "")
+                {
+                    Console.WriteLine("ERROR:");
+                    Console.WriteLine(errorOutput);
+                }
             }
         }
     }

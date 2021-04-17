@@ -18,27 +18,19 @@ namespace SharedLib
         public bool IsSpent { get; set; }
         public bool IsVerified { get; set; }
 
-        public Address(string addressValue, bool isSpent)
+        [JsonConstructor]
+        public Address(string ownerName, string addressValue, bool isSpent, bool isVerified)
         {
+            ownerName = ownerName.Trim();
+            if (ownerName == "") ownerName = "Anonymous";
+            OwnerName = ownerName;
+
             addressValue = addressValue.Trim();
             if (!IsIotaAddress(addressValue))
                 throw new ArgumentException($"Address addressValue {addressValue} is not in correct format");
 
-            OwnerName = "Anonymous";
             AddressValue = addressValue;
-            IsSpent = isSpent;
-        }
-
-        ////Todo: is this correct? other constructor now isVerified is used?
-        //public Address(string ownerName, string addressValue, bool isSpent) : this(addressValue, isSpent)
-        //{
-        //    OwnerName = ownerName;
-        //}
-
-        [JsonConstructor]
-        public Address(string ownerName, string addressValue, bool isSpent, bool isVerified) : this(addressValue, isSpent)
-        {
-            OwnerName = ownerName;
+            IsSpent = isSpent; 
             IsVerified = isVerified;
         }
 
@@ -49,10 +41,8 @@ namespace SharedLib
 
         public static bool IsIotaAddress(string addressValue)
         {
-            String decodedAddress;
-
             addressValue = addressValue.Trim();
-            return TryDecode(addressValue, out decodedAddress) &&
+            return TryDecode(addressValue, out var decodedAddress) &&
                    (decodedAddress.Length == Iota_Address_Length * 2); //addressValue must be 33 bytes (base58 encoded)
         }
 
@@ -64,7 +54,7 @@ namespace SharedLib
                 decodedAddressValue = Decode(addressValue);
                 return true;
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 return false;
             }
@@ -77,7 +67,7 @@ namespace SharedLib
             return s.Replace("-", "");
         }
 
-        public override bool Equals(object? obj)
+        public override bool Equals(object obj)
         {
             //Check for null and compare run-time types.
             if ((obj == null) || !this.GetType().Equals(obj.GetType()))

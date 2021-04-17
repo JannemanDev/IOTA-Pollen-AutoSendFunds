@@ -8,6 +8,7 @@ namespace SharedLib
 {
     public class Settings
     {
+        public string WalletName { get; set; }
         public bool PublishReceiveAddress { get; set; }
         public string CliWalletFullpath { get; set; }
         public string AccessManaId { get; set; }

@@ -87,7 +87,7 @@ namespace IOTA_Pollen_AutoSendFunds
             }
         }
 
-        public async Task SendFunds(int amount, Address destinationAddress, string tokenColor)
+        public static async Task SendFunds(int amount, Address destinationAddress, string tokenColor)
         {
             Console.WriteLine($"Sending {amount} {tokenColor} to {destinationAddress}");
 
@@ -115,9 +115,8 @@ namespace IOTA_Pollen_AutoSendFunds
             List<string> lines = commandLine.Result.StandardOutput.Split("\n", StringSplitOptions.None).ToList();
             lines = lines.Where(line =>
                 {
-                    int number;
                     string firstColumn = line.Split("\t")[0];
-                    bool isNumber = int.TryParse(firstColumn, out number);
+                    bool isNumber = int.TryParse(firstColumn, out _);
                     return isNumber;
                 })
                 .ToList();
@@ -128,8 +127,7 @@ namespace IOTA_Pollen_AutoSendFunds
                 int index = Convert.ToInt32(columns[0]); //skip/not used
                 string addressValue = columns[1];
                 bool isSpent = Convert.ToBoolean(columns[2]);
-                Address address;
-                address = new Address("Yourself", addressValue, isSpent, true);
+                Address address = new Address(Program.settings.WalletName, addressValue, isSpent, true);
 
                 Addresses.Add(address);
             }
@@ -144,7 +142,7 @@ namespace IOTA_Pollen_AutoSendFunds
         {
             //includes Ok and Pending balances
             int balanceAtStart = Balances
-                                    .Where(balance => balance.Color.ToUpper() == "IOTA")
+                                    .Where(balance => balance.Color.ToUpper() == color.ToUpper())
                                     .Select(balance => balance.BalanceValue)
                                     .DefaultIfEmpty(0)
                                     .Sum();
@@ -153,7 +151,7 @@ namespace IOTA_Pollen_AutoSendFunds
 
         public async Task<bool> RequestFunds()
         {
-            UpdateBalances();
+            await UpdateBalances();
 
             int balanceAtStart = TotalBalanceOfTokenByColor("IOTA");
 

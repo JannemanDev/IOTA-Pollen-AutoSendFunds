@@ -1,4 +1,5 @@
 {
+  "WalletName" :  "MyWallet 3",
   "LogFileTransactions": "",
   "PublishReceiveAddress": true,
   "CliWalletFullpath": "c:\\temp\\iota\\newwallet3\\cli-wallet.exe",

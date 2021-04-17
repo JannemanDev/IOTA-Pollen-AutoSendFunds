@@ -16,7 +16,8 @@ using SharedLib.Services;
 using SimpleBase;
 
 /*
-
+ * v Show only errors / or also option(?)
+ *
  * Default settings file meeleveren
  *
  * Alternatieve node: http://45.83.107.51:8080/
@@ -184,7 +185,7 @@ namespace IOTA_Pollen_AutoSendFunds
             }
 
             //create lockfile to prevent running multiple program instances for same wallet
-            File.WriteAllText(lockFile, Process.GetCurrentProcess().Id.ToString());
+            await File.WriteAllTextAsync(lockFile, Environment.ProcessId.ToString());
 
             //Todo: temporary solution for error: "The SSL connection could not be established, see inner exception."
             //       when using RestSharp.
@@ -193,14 +194,6 @@ namespace IOTA_Pollen_AutoSendFunds
                 (sender, certificate, chain, sslPolicyErrors) => true;
             
             CliWallet cliWallet = new CliWallet();
-            await cliWallet.UpdateBalances();
-
-            //if (cliWallet.Balances.Count == 0)
-            //{
-            //    Console.WriteLine("No balance(s) exist! Exiting...");
-            //    CleanExit(1);
-            //}
-
             await cliWallet.UpdateAddresses();
 
             AddressService addressService = new AddressService(Program.settings.UrlWalletReceiveAddresses, Program.settings.GoShimmerDashboardUrl);
@@ -275,7 +268,7 @@ namespace IOTA_Pollen_AutoSendFunds
                 Address address = receiveAddresses[receiveAddressIndex];
                 try
                 {
-                    await cliWallet.SendFunds(amount, address, balance.Color);
+                    await CliWallet.SendFunds(amount, address, balance.Color);
                 }
                 catch (Exception e)
                 {

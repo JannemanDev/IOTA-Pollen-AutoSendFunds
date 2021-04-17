@@ -55,7 +55,6 @@ namespace SharedLib.Services
         public bool AddAddress(Address address)
         {
             HashSet<Address> addresses = GetAllAddresses();
-            Address addressFound;
             bool updated = false;
             string json;
 
