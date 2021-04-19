@@ -7,7 +7,9 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Channels;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using SharedLib.Services;
 
 namespace AddressBookWebService
@@ -26,6 +28,11 @@ namespace AddressBookWebService
         {
             services.AddControllersWithViews();
 
+            //var addressBookSettings = new AddressBookSettings();
+            //Configuration.GetSection("AddressBookSettings").Bind(addressBookSettings);
+
+            services.Configure<AddressBookSettings>(Configuration.GetSection("AddressBookSettings"));
+
             string filenameWhereToStoreReceiveAddresses = Configuration.GetValue<string>("AddressBookSettings:FilenameWhereToStoreReceiveAddresses");
             string goShimmerDashboardUrl = Configuration.GetValue<string>("AddressBookSettings:GoShimmerDashboardUrl");
             services.AddSingleton<IAddressService>(x => new AddressService(filenameWhereToStoreReceiveAddresses, goShimmerDashboardUrl));
@@ -34,6 +41,13 @@ namespace AddressBookWebService
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.Use(async (context, next) =>
+            {
+                Console.WriteLine("Before Invoke from 1st app.Use()\n");
+                await next();
+                Console.WriteLine("After Invoke from 1st app.Use()\n");
+            });
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();

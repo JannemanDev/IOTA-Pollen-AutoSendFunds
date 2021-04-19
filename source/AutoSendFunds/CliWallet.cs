@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Serilog;
 using SharedLib;
 
 namespace IOTA_Pollen_AutoSendFunds
@@ -45,7 +47,7 @@ namespace IOTA_Pollen_AutoSendFunds
 
             if (commandLine.Result.ExitCode != 0)
             {
-                Console.WriteLine("Error retrieving balance(s)!");
+                Log.Logger.Error("Error retrieving balance(s)!");
             }
 
             //split in lines and only consider lines with a balance
@@ -89,7 +91,7 @@ namespace IOTA_Pollen_AutoSendFunds
 
         public static async Task SendFunds(int amount, Address destinationAddress, string tokenColor)
         {
-            Console.WriteLine($"Sending {amount} {tokenColor} to {destinationAddress}");
+            Log.Logger.Information($"Sending {amount} {tokenColor} to {destinationAddress}");
 
             //run cli-wallet balance and capture output
             string arguments = $"send-funds -amount {amount} -dest-addr {destinationAddress.AddressValue} -color {tokenColor} -access-mana-id {Program.settings.AccessManaId} -consensus-mana-id {Program.settings.ConsensusManaId}";
@@ -98,7 +100,7 @@ namespace IOTA_Pollen_AutoSendFunds
 
             if (commandLine.Result.ExitCode != 0)
             {
-                Console.WriteLine(" Error sending funds!");
+                Log.Logger.Error(" Error sending funds!");
             }
         }
 
@@ -134,7 +136,7 @@ namespace IOTA_Pollen_AutoSendFunds
 
             if (commandLine.Result.ExitCode != 0)
             {
-                Console.WriteLine(" Error getting wallet receive addresses!");
+                Log.Logger.Error(" Error getting wallet receive addresses!");
             }
         }
 
@@ -155,7 +157,7 @@ namespace IOTA_Pollen_AutoSendFunds
 
             int balanceAtStart = TotalBalanceOfTokenByColor("IOTA");
 
-            Console.WriteLine("\nRequesting IOTA tokens from the faucet... this takes a while...");
+            Log.Logger.Information("\nRequesting IOTA tokens from the faucet... this takes a while...");
 
             //run cli-wallet balance and capture output
             string arguments = $"request-funds";
@@ -164,18 +166,18 @@ namespace IOTA_Pollen_AutoSendFunds
 
             if (commandLine.Result.ExitCode != 0)
             {
-                Console.WriteLine("Failed!");
+                Log.Logger.Error("Failed!");
                 return false;
             }
 
-            Console.WriteLine("Request complete... now waiting for IOTA tokens to arrive....");
+            Log.Logger.Information("Request complete... now waiting for IOTA tokens to arrive....");
 
-            int seconds = 0;
             bool failed = false;
             bool firstPrintFlag = true;
+            Stopwatch stopwatch = Stopwatch.StartNew();
             do
             {
-                if (seconds >= Program.settings.MaxWaitingTimeInSecondsForRequestingFunds)
+                if (stopwatch.Elapsed.TotalSeconds >= Program.settings.MaxWaitingTimeInSecondsForRequestingFunds)
                 {
                     failed = true;
                     break;
@@ -189,19 +191,17 @@ namespace IOTA_Pollen_AutoSendFunds
                 {
                     if (firstPrintFlag)
                     {
-                        Console.Write("Found pending IOTA transaction! Waiting for it to complete...");
+                        Log.Logger.Information("Found pending IOTA transaction! Waiting for it to complete...");
                         firstPrintFlag = false;
                     }
 
-                    Console.Write($" {seconds}");
+                    Log.Logger.Information($" {stopwatch.Elapsed.Seconds}");
                 }
-
-                seconds++;
             } while (TotalBalanceOfTokenByColor("IOTA") <= balanceAtStart);
 
-            if (!firstPrintFlag) Console.WriteLine();
+            if (!firstPrintFlag) Log.Logger.Information("");
 
-            if (failed) Console.WriteLine($"Requesting IOTA tokens failed to complete within {Program.settings.MaxWaitingTimeInSecondsForRequestingFunds} seconds");
+            if (failed) Log.Logger.Error($"Requesting IOTA tokens failed to complete within {Program.settings.MaxWaitingTimeInSecondsForRequestingFunds} seconds");
 
             return !failed;
         }
@@ -209,7 +209,7 @@ namespace IOTA_Pollen_AutoSendFunds
         public override string ToString()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append("CliWallet:\n");
+            stringBuilder.Append($"CliWallet '{Program.settings.WalletName}':\n");
 
             if (Balances.Count == 0) stringBuilder.Append(" Empty! No balances found!");
             else

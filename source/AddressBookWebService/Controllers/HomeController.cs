@@ -5,8 +5,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using AddressBookWebService.DTOs;
 using AddressBookWebService.ViewModels;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using SharedLib;
 using SharedLib.Services;
 
@@ -17,12 +19,24 @@ namespace AddressBookWebService.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly IConfiguration _config;
         private readonly IAddressService _addressService;
+        private readonly AddressBookSettings _addressBookSettings;
 
-        public HomeController(ILogger<HomeController> logger, IConfiguration config, IAddressService addressService)
+        public HomeController(ILogger<HomeController> logger, IConfiguration config, IAddressService addressService, IOptionsSnapshot<AddressBookSettings> addressBookSettings)
         {
             _logger = logger;
             _config = config;
             _addressService = addressService;
+            _addressBookSettings = addressBookSettings.Value;
+        }
+
+        [HttpGet("/api/available")]
+        public ObjectResult Available()
+        {
+            bool available = _addressBookSettings.Available;
+            string description = _addressBookSettings.Description;
+            OnlineStatusResponse onlineStatusResponse = new OnlineStatusResponse(available, description);
+            if (available) return Ok(onlineStatusResponse);
+            else return StatusCode(503, onlineStatusResponse);
         }
 
         public IActionResult Index()

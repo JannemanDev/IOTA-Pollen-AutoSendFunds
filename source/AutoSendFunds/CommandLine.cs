@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CliWrap;
 using CliWrap.Buffered;
+using Serilog;
 
 namespace IOTA_Pollen_AutoSendFunds
 {
@@ -45,18 +46,15 @@ namespace IOTA_Pollen_AutoSendFunds
             standardOutput = Result.StandardOutput;
             errorOutput = Result.StandardError;
 
-            if (Program.settings.ShowOutputCliWallet)
-            {
-                Console.WriteLine("COMMAND:");
-                Console.WriteLine($"{command.TargetFilePath} {command.Arguments}");
-                Console.WriteLine("OUTPUT:");
-                Console.WriteLine(standardOutput);
+            Log.Logger.Debug("COMMAND:");
+            Log.Logger.Debug($"{command.TargetFilePath} {command.Arguments}");
+            Log.Logger.Debug("OUTPUT:");
+            Log.Logger.Debug(standardOutput);
 
-                if (errorOutput.Trim() != "")
-                {
-                    Console.WriteLine("ERROR:");
-                    Console.WriteLine(errorOutput);
-                }
+            if (errorOutput.Trim() != "")
+            {
+                Log.Logger.Debug("ERROR:");
+                Log.Logger.Debug(errorOutput);
             }
         }
     }

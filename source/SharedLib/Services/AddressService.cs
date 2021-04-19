@@ -6,6 +6,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Polly;
 using RestSharp;
 using SharedLib;
 
@@ -15,14 +16,32 @@ namespace SharedLib.Services
     {
         private readonly string _addressUrl;
         private readonly string _dashboardUrl;
+        private readonly HashSet<Address> _addresses;
+
+        private readonly Policy _fileWriterPolicy;
 
         public AddressService(string addressUrl, string dashboardUrl)
         {
             _addressUrl = addressUrl;
             _dashboardUrl = dashboardUrl;
+            _addresses = LoadAllAddresses();
+
+            _fileWriterPolicy = Policy
+                .Handle<IOException>()
+                .RetryForever((exception, retryCount, context) =>
+                {
+                    Console.WriteLine($"File {_addressUrl} in use. Retry count: {retryCount}");
+                });
         }
 
         public HashSet<Address> GetAllAddresses(bool verifyIfReceiveAddressesExist = false)
+        {
+            if (verifyIfReceiveAddressesExist) VerifyAddresses();
+
+            return _addresses;
+        }
+
+        public HashSet<Address> LoadAllAddresses(bool verifyIfReceiveAddressesExist = false)
         {
             //check for addressUrl or local file
             string json;
@@ -41,20 +60,21 @@ namespace SharedLib.Services
             }
             HashSet<Address> receiveAddresses = JsonConvert.DeserializeObject<HashSet<Address>>(json);
 
-            if (verifyIfReceiveAddressesExist)
-            {
-                foreach (Address address in receiveAddresses)
-                {
-                    address.IsVerified = AddressExist(address.AddressValue);
-                }
-            }
+            if (verifyIfReceiveAddressesExist) VerifyAddresses();
 
             return receiveAddresses;
         }
 
+        private void VerifyAddresses()
+        {
+            foreach (Address address in _addresses)
+            {
+                address.IsVerified = AddressExist(address.AddressValue);
+            }
+        }
+
         public bool AddAddress(Address address)
         {
-            HashSet<Address> addresses = GetAllAddresses();
             bool updated = false;
             string json;
 
@@ -77,14 +97,14 @@ namespace SharedLib.Services
             }
             else
             {
-                if (addresses.Contains(address))
+                if (_addresses.Contains(address))
                 {
-                    addresses.Remove(address);
+                    _addresses.Remove(address);
                     updated = true;
                 }
-                addresses.Add(address);
-                json = JsonConvert.SerializeObject(addresses, Formatting.Indented);
-                File.WriteAllText(_addressUrl, json);
+                _addresses.Add(address);
+                json = JsonConvert.SerializeObject(_addresses, Formatting.Indented);
+                _fileWriterPolicy.Execute(() => { File.WriteAllText(_addressUrl, json); });
             }
 
             return updated;
