@@ -15,11 +15,11 @@ namespace SharedLib
 
         public string OwnerName { get; set; }
         public string AddressValue { get; set; }
-        public bool IsSpent { get; set; }
+        //public bool IsSpent { get; set; }
         public bool IsVerified { get; set; }
 
         [JsonConstructor]
-        public Address(string ownerName, string addressValue, bool isSpent, bool isVerified)
+        public Address(string ownerName, string addressValue, bool isVerified)
         {
             ownerName = ownerName.Trim();
             if (ownerName == "") ownerName = "Anonymous";
@@ -30,7 +30,7 @@ namespace SharedLib
                 throw new ArgumentException($"Address addressValue {addressValue} is not in correct format");
 
             AddressValue = addressValue;
-            IsSpent = isSpent; 
+            //IsSpent = isSpent; 
             IsVerified = isVerified;
         }
 

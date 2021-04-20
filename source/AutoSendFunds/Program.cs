@@ -153,9 +153,23 @@ namespace IOTA_Pollen_AutoSendFunds
             CliWallet cliWallet = new CliWallet();
             await cliWallet.UpdateAddresses();
 
+            //PublishReceiveAddress
             AddressService addressService = new AddressService(Program.settings.UrlWalletReceiveAddresses, Program.settings.GoShimmerDashboardUrl);
 
             if (settings.PublishReceiveAddress) addressService.AddAddress(cliWallet.ReceiveAddress);
+            else addressService.DeleteAddress(cliWallet.ReceiveAddress.AddressValue);
+
+            //PublishWebApiUrlOfNodeTakenFromWallet
+            string jsonCliWalletConfig = File.ReadAllText(MiscUtil.CliWalletConfig(cliWalletConfigFolder));
+            CliWalletConfig cliWalletConfig = JsonConvert.DeserializeObject<CliWalletConfig>(jsonCliWalletConfig);
+
+            //Todo: 
+            NodeService nodeService = new NodeService(settings.UrlWalletNode);
+
+            string nodeUrl = cliWalletConfig.WebAPI;
+            if (settings.PublishWebApiUrlOfNodeTakenFromWallet) nodeService.AddNode(nodeUrl);
+            else nodeService.DeleteNode(nodeUrl);
+
 
             List<Address> receiveAddresses = addressService.GetAllAddresses(Program.settings.VerifyIfReceiveAddressesExist).ToList();
             //only consider receiveAddresses of other persons
@@ -295,6 +309,12 @@ namespace IOTA_Pollen_AutoSendFunds
                 settings.GoShimmerDashboardUrl = host;
             }
 
+            // 3. Urls
+            bool updateUrlWalletReceiveAddresses = (settings.UrlWalletReceiveAddresses.Trim() == "");
+            bool updateUrlWalletNode = (settings.UrlWalletNode.Trim() == "");
+            if (updateUrlWalletReceiveAddresses) settings.UrlWalletReceiveAddresses = Settings.defaultUrlApiServer;
+            if (updateUrlWalletNode) settings.UrlWalletNode = Settings.defaultUrlApiServer;            
+            
             //write settings back
             await File.WriteAllTextAsync(settingsFile, JsonConvert.SerializeObject(settings, Formatting.Indented));
         }

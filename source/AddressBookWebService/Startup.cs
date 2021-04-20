@@ -31,11 +31,15 @@ namespace AddressBookWebService
             //var addressBookSettings = new AddressBookSettings();
             //Configuration.GetSection("AddressBookSettings").Bind(addressBookSettings);
 
-            services.Configure<AddressBookSettings>(Configuration.GetSection("AddressBookSettings"));
+            services.Configure<AddressBookSettings>(Configuration.GetSection("AddressBookSettings")); //hot reloadable
 
             string filenameWhereToStoreReceiveAddresses = Configuration.GetValue<string>("AddressBookSettings:FilenameWhereToStoreReceiveAddresses");
             string goShimmerDashboardUrl = Configuration.GetValue<string>("AddressBookSettings:GoShimmerDashboardUrl");
             services.AddSingleton<IAddressService>(x => new AddressService(filenameWhereToStoreReceiveAddresses, goShimmerDashboardUrl));
+
+            string filenameWhereToStoreNodeUrls = Configuration.GetValue<string>("AddressBookSettings:FilenameWhereToStoreNodeUrls");
+            services.AddSingleton<INodeService>(x => new NodeService(filenameWhereToStoreNodeUrls));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

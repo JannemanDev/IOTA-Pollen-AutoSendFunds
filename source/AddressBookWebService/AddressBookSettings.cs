@@ -8,7 +8,7 @@ namespace AddressBookWebService
     public class AddressBookSettings
     {
         public string FilenameWhereToStoreReceiveAddresses { get; set; }
-
+        public string FilenameWhereToStoreNodeUrls { get; set; }
         public string GoShimmerDashboardUrl { get; set; }
 
         public bool Available { get; set; }

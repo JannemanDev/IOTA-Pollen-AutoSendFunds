@@ -33,15 +33,8 @@ namespace SharedLib.Services
                     Console.WriteLine($"File {_addressUrl} in use. Retry count: {retryCount}");
                 });
         }
-
-        public HashSet<Address> GetAllAddresses(bool verifyIfReceiveAddressesExist = false)
-        {
-            if (verifyIfReceiveAddressesExist) VerifyAddresses();
-
-            return _addresses;
-        }
-
-        public HashSet<Address> LoadAllAddresses(bool verifyIfReceiveAddressesExist = false)
+        
+        private HashSet<Address> LoadAllAddresses(bool verifyIfReceiveAddressesExist = false)
         {
             //check for addressUrl or local file
             string json;
@@ -64,6 +57,14 @@ namespace SharedLib.Services
 
             return receiveAddresses;
         }
+
+        public HashSet<Address> GetAllAddresses(bool verifyIfReceiveAddressesExist = false)
+        {
+            if (verifyIfReceiveAddressesExist) VerifyAddresses();
+
+            return _addresses;
+        }
+
 
         private void VerifyAddresses()
         {
@@ -108,6 +109,44 @@ namespace SharedLib.Services
             }
 
             return updated;
+        }
+
+        public bool DeleteAddress(string addressValue)
+        {
+            bool deleted = false;
+            string json;
+
+            if (_addressUrl.ToUpper().StartsWith("HTTP://") || _addressUrl.ToUpper().StartsWith("HTTPS://"))
+            {
+                var client = new RestClient(_addressUrl);
+                string path = $"/api/address/{addressValue}";
+                var request = new RestRequest(path, DataFormat.None);
+
+                Console.WriteLine($"{_addressUrl} request:{path}");
+                IRestResponse response = client.Delete(request);
+                json = response.Content;
+                Console.WriteLine($"json response: {json}");
+                Console.WriteLine($"{response.ErrorMessage}");
+                Console.WriteLine($"{response}");
+                JObject obj = JObject.Parse(json);
+
+                return (bool)obj["deleted"];
+            }
+            else
+            {
+                //search hashset for addressValue
+                Address address = _addresses.FirstOrDefault(address => address.AddressValue == addressValue);
+
+                if (address != null)
+                {
+                    _addresses.Remove(address);
+                    deleted = true;
+                }
+                json = JsonConvert.SerializeObject(_addresses, Formatting.Indented);
+                _fileWriterPolicy.Execute(() => { File.WriteAllText(_addressUrl, json); });
+            }
+
+            return deleted;
         }
 
         public bool AddressExist(string addressValue)

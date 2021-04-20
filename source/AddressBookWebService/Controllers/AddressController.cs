@@ -39,6 +39,17 @@ namespace AddressBookWebService.Controllers
             return _addressService.GetAllAddresses().ElementAt(id);
         }
 
+        // GET api/<AddressController>/5
+        [HttpDelete("{addressValue}")]
+        public DeleteAddressResponse Delete(string addressValue)
+        {
+            Console.WriteLine($"DELETE /api/address/{addressValue}");
+
+            bool deleted = _addressService.DeleteAddress(addressValue);
+
+            return new DeleteAddressResponse(true, "", deleted);
+        }
+
         [HttpGet("search/{addressValue}")]
         public Address Get(string addressValue)
         {
@@ -72,8 +83,7 @@ namespace AddressBookWebService.Controllers
                 return new AddAddressResponse(false, "Not a valid AddressViewModel!", false);
             }
 
-            //Todo: refactor isSpent
-            Address address = new Address(addressViewModel.OwnerName, addressViewModel.AddressValue, true, true);
+            Address address = new Address(addressViewModel.OwnerName, addressViewModel.AddressValue, true);
             bool updated = _addressService.AddAddress(address);
 
             return new AddAddressResponse(true, "", updated);
