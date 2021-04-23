@@ -10,6 +10,9 @@ using System.Linq;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using SharedLib.Interfaces;
+using SharedLib.Models;
+using SharedLib.Repositories;
 using SharedLib.Services;
 
 namespace AddressBookWebService
@@ -33,13 +36,20 @@ namespace AddressBookWebService
 
             services.Configure<AddressBookSettings>(Configuration.GetSection("AddressBookSettings")); //hot reloadable
 
+
             string filenameWhereToStoreReceiveAddresses = Configuration.GetValue<string>("AddressBookSettings:FilenameWhereToStoreReceiveAddresses");
             string goShimmerDashboardUrl = Configuration.GetValue<string>("AddressBookSettings:GoShimmerDashboardUrl");
-            services.AddSingleton<IAddressService>(x => new AddressService(filenameWhereToStoreReceiveAddresses, goShimmerDashboardUrl));
+            FileRepo<Address> fileAddressRepo = new FileRepo<Address>(filenameWhereToStoreReceiveAddresses);
+            fileAddressRepo.AutoReload = true; //true to be sure, but as a Singleton object on a webserver autoreload is probably not necessary
+            services.AddSingleton<IAddressService>(x => new AddressService(fileAddressRepo, goShimmerDashboardUrl));
 
             string filenameWhereToStoreNodeUrls = Configuration.GetValue<string>("AddressBookSettings:FilenameWhereToStoreNodeUrls");
-            services.AddSingleton<INodeService>(x => new NodeService(filenameWhereToStoreNodeUrls));
+            FileRepo<Node> fileNodeRepo = new FileRepo<Node>(filenameWhereToStoreNodeUrls);
+            fileNodeRepo.AutoReload = true;  //true to be sure, but as a Singleton object on a webserver autoreload is probably not necessary
+            services.AddSingleton<INodeService>(x => new NodeService(fileNodeRepo));
 
+            Console.WriteLine($"Storage location addresses: {filenameWhereToStoreReceiveAddresses}");
+            Console.WriteLine($"Storage location nodes: {filenameWhereToStoreNodeUrls}");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

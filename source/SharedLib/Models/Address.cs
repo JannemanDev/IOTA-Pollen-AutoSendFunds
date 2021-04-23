@@ -7,11 +7,15 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SimpleBase;
 
-namespace SharedLib
+namespace SharedLib.Models
 {
-    public class Address
+    public class Address : Entity
     {
         public const int Iota_Address_Length = 33;
+
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        public override string Id => AddressValue;
 
         public string OwnerName { get; set; }
         public string AddressValue { get; set; }

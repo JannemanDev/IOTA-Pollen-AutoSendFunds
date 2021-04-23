@@ -14,6 +14,8 @@ using RestSharp;
 using Serilog;
 using Serilog.Events;
 using SharedLib;
+using SharedLib.Models;
+using SharedLib.Repositories.Addresses;
 using SharedLib.Services;
 using SimpleBase;
 
@@ -154,24 +156,25 @@ namespace IOTA_Pollen_AutoSendFunds
             await cliWallet.UpdateAddresses();
 
             //PublishReceiveAddress
-            AddressService addressService = new AddressService(Program.settings.UrlWalletReceiveAddresses, Program.settings.GoShimmerDashboardUrl);
+            AddressService addressService = new AddressService(RepoFactory.CreateAddressRepo(settings.UrlWalletReceiveAddresses), settings.GoShimmerDashboardUrl);
 
-            if (settings.PublishReceiveAddress) addressService.AddAddress(cliWallet.ReceiveAddress);
-            else addressService.DeleteAddress(cliWallet.ReceiveAddress.AddressValue);
+            if (settings.PublishReceiveAddress) addressService.Add(cliWallet.ReceiveAddress);
+            else addressService.Delete(cliWallet.ReceiveAddress.AddressValue);
 
             //PublishWebApiUrlOfNodeTakenFromWallet
             string jsonCliWalletConfig = File.ReadAllText(MiscUtil.CliWalletConfig(cliWalletConfigFolder));
             CliWalletConfig cliWalletConfig = JsonConvert.DeserializeObject<CliWalletConfig>(jsonCliWalletConfig);
 
             //Todo: 
-            NodeService nodeService = new NodeService(settings.UrlWalletNode);
+            NodeService nodeService = new NodeService(RepoFactory.CreateNodeRepo(settings.UrlWalletNode));
 
             string nodeUrl = cliWalletConfig.WebAPI;
-            if (settings.PublishWebApiUrlOfNodeTakenFromWallet) nodeService.AddNode(nodeUrl);
-            else nodeService.DeleteNode(nodeUrl);
+            Node node = new Node(nodeUrl);
+            if (settings.PublishWebApiUrlOfNodeTakenFromWallet) nodeService.Add(node);
+            else nodeService.Delete(nodeUrl);
+            
 
-
-            List<Address> receiveAddresses = addressService.GetAllAddresses(Program.settings.VerifyIfReceiveAddressesExist).ToList();
+            List<Address> receiveAddresses = addressService.GetAll(Program.settings.VerifyIfReceiveAddressesExist).ToList();
             //only consider receiveAddresses of other persons
             receiveAddresses = receiveAddresses
                 .Where(receiveAddress => !receiveAddress.Equals(cliWallet.ReceiveAddress)).ToList();

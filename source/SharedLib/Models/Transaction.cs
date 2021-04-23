@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SharedLib
+namespace SharedLib.Models
 {
     public class Transaction
     {

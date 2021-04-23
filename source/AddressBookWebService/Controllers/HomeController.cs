@@ -10,6 +10,8 @@ using AddressBookWebService.ViewModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using SharedLib;
+using SharedLib.Interfaces;
+using SharedLib.Models;
 using SharedLib.Services;
 
 namespace AddressBookWebService.Controllers
@@ -41,7 +43,7 @@ namespace AddressBookWebService.Controllers
 
         public IActionResult Index()
         {
-            ViewBag.Addresses = _addressService.GetAllAddresses();
+            ViewBag.Addresses = _addressService.GetAll();
             ViewBag.Updated = null;
 
             return View(new AddressViewModel() { AddressValue = "", OwnerName = "Anonymous" });
@@ -61,9 +63,9 @@ namespace AddressBookWebService.Controllers
             if (addressViewModel.OwnerName == "") addressViewModel.OwnerName = "Anonymous";
 
             Address address = new Address(addressViewModel.OwnerName, addressViewModel.AddressValue, true);
-            ViewBag.Updated = (Boolean)_addressService.AddAddress(address);
+            ViewBag.Updated = (Boolean)_addressService.Add(address);
 
-            ViewBag.Addresses = _addressService.GetAllAddresses();
+            ViewBag.Addresses = _addressService.GetAll();
 
             return View(new AddressViewModel() { AddressValue = "", OwnerName = "Anonymous" });
         }

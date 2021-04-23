@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Serilog;
 using SharedLib;
+using SharedLib.Models;
 
 namespace IOTA_Pollen_AutoSendFunds
 {
@@ -17,8 +18,6 @@ namespace IOTA_Pollen_AutoSendFunds
         public List<Address> Addresses { get; set; }
 
         public Address ReceiveAddress => Addresses.FirstOrDefault();
-        public Address UnspentAddress => Addresses.Single(address => !address.IsSpent);
-        public List<Address> SpentAddresses => Addresses.Where(address => address.IsSpent).ToList();
 
         public CliWallet()
         {
@@ -128,8 +127,8 @@ namespace IOTA_Pollen_AutoSendFunds
                 List<string> columns = line.Split("\t", StringSplitOptions.RemoveEmptyEntries).ToList();
                 int index = Convert.ToInt32(columns[0]); //skip/not used
                 string addressValue = columns[1];
-                bool isSpent = Convert.ToBoolean(columns[2]);
-                Address address = new Address(Program.settings.WalletName, addressValue, isSpent, true);
+                bool isSpent = Convert.ToBoolean(columns[2]); //ignore
+                Address address = new Address(Program.settings.WalletName, addressValue, true);
 
                 Addresses.Add(address);
             }

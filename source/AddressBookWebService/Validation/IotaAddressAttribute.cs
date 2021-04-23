@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 using SharedLib;
+using SharedLib.Models;
 
 namespace AddressBookWebService.Validation
 {
