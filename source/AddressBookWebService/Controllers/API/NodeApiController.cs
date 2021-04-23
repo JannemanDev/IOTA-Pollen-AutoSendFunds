@@ -11,13 +11,13 @@ using SharedLib.Services;
 
 namespace AddressBookWebService.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/node")]
     [ApiController]
-    public class NodeController : ControllerBase
+    public class NodeApiController : ControllerBase
     {
         private readonly INodeService _nodeService;
 
-        public NodeController(INodeService nodeService)
+        public NodeApiController(INodeService nodeService)
         {
             _nodeService = nodeService;
         }

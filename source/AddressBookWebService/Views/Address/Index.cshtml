@@ -1,0 +1,73 @@
+﻿@using SharedLib.Models
+@model AddressViewModel
+
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <form method="post" enctype="multipart/form-data" asp-controller="Address" asp-action="Index">
+        <div asp-validation-summary="ModelOnly">
+            <span>Please correct the following errors</span>
+        </div>
+        <table>
+            <tr>
+                <td><label asp-for="OwnerName"></label></td>
+                <td class="text-left">
+                    <input asp-for="OwnerName" value="@Model.OwnerName" />&nbsp;<span asp-validation-for="OwnerName" style="color: red"></span>
+                </td>
+            </tr>
+            <tr>
+                <td><label asp-for="AddressValue">Address*</label></td>
+                <td class="text-left">
+                    <input asp-for="AddressValue" value="@Model.AddressValue" />&nbsp;<span asp-validation-for="AddressValue" style="color: red"></span>
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td class="text-left"><input id="addressSubmit" type="submit" value="Submit" disabled /></td>
+            </tr>
+        </table>
+        @if (@ViewBag.Updated != null && @ViewBag.Updated)
+        {
+            <p class="text-left" style="color: green">Updated address</p>
+        }
+        else if (@ViewBag.Updated != null && !@ViewBag.Updated)
+        {
+            <p class="text-left" style="color: green">Added address</p>
+        }
+        <hr />
+    </form>
+
+    @if (@ViewBag.Addresses != null)
+    {
+        <p class="text-left"><a href="/api/address/all">Download as JSON data</a></p>
+        <table>
+            <tr>
+                <th>
+                    Name
+                </th>
+                <th>
+                    Receive Address
+                </th>
+                <th>
+                    Is Verified?
+                </th>
+            </tr>
+            @foreach (Address address in @ViewBag.Addresses)
+            {
+                <tr>
+                    <td class="text-left">
+                        @Html.DisplayFor(modelItem => address.OwnerName)
+                    </td>
+                    <td class="text-left">
+                        @Html.DisplayFor(modelItem => address.AddressValue)
+                    </td>
+                    <td class="text-center">
+                        @Html.DisplayFor(modelItem => address.IsVerified)
+                    </td>
+                </tr>
+            }
+        </table>
+    }
+</div>

@@ -16,31 +16,17 @@ using SharedLib.Services;
 
 namespace AddressBookWebService.Controllers
 {
-    public class HomeController : Controller
+    public class AddressController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly IConfiguration _config;
+        private readonly ILogger<AddressController> _logger;
         private readonly IAddressService _addressService;
-        private readonly AddressBookSettings _addressBookSettings;
 
-        public HomeController(ILogger<HomeController> logger, IConfiguration config, IAddressService addressService, IOptionsSnapshot<AddressBookSettings> addressBookSettings)
+        public AddressController(ILogger<AddressController> logger, IAddressService addressService)
         {
             _logger = logger;
-            _config = config;
             _addressService = addressService;
-            _addressBookSettings = addressBookSettings.Value;
         }
-
-        [HttpGet("/api/available")]
-        public ObjectResult Available()
-        {
-            bool available = _addressBookSettings.Available;
-            string description = _addressBookSettings.Description;
-            OnlineStatusResponse onlineStatusResponse = new OnlineStatusResponse(available, description);
-            if (available) return Ok(onlineStatusResponse);
-            else return StatusCode(503, onlineStatusResponse);
-        }
-
+        
         public IActionResult Index()
         {
             ViewBag.Addresses = _addressService.GetAll();

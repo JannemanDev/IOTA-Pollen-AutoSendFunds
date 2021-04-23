@@ -16,13 +16,13 @@ using SharedLib.Services;
 
 namespace AddressBookWebService.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/address")]
     [ApiController]
-    public class AddressController : ControllerBase
+    public class AddressApiController : ControllerBase
     {
         private readonly IAddressService _addressService;
 
-        public AddressController(IAddressService addressService)
+        public AddressApiController(IAddressService addressService)
         {
             _addressService = addressService;
         }

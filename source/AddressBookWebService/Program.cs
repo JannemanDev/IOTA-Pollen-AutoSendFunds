@@ -23,10 +23,14 @@ namespace AddressBookWebService
                 .ConfigureAppConfiguration((HostBuilderContext hostBuilderContext, IConfigurationBuilder config) =>
                 {
                     var env = hostBuilderContext.HostingEnvironment;
-                    string wwwRoot = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                    string exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                    Console.WriteLine($"exePath = {exePath}");
 
+                    Console.WriteLine($"ContentRootPath = {env.ContentRootPath}");
+
+                    
                     config
-                        .SetBasePath(wwwRoot)
+                        .SetBasePath(env.ContentRootPath)
                         .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                         //.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: false, reloadOnChange: true)
                         .AddEnvironmentVariables();
