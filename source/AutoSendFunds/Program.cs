@@ -12,6 +12,7 @@ using IOTA_Pollen_AutoSendFunds.ExtensionMethods;
 using Newtonsoft.Json;
 using RestSharp;
 using Serilog;
+using Serilog.Core;
 using Serilog.Events;
 using SharedLib;
 using SharedLib.Models;
@@ -20,7 +21,20 @@ using SharedLib.Services;
 using SimpleBase;
 
 /*
+ * "I noticed cli-wallet.exe changed it behaviour when sending funds for example... now you can't send two transactions in a row when balance is still pending."
+ * "If you have all your funds on the same output, how do you expect to send the second tx when the first tx spent that output? In this case, you need to wait until the first tx confirms, so you have available funds in the wallet.
+ *  If however you have let's say 100-100 funds on two outputs, you can send two txs spending these simultaneously, because there is no dependency between the txs."
+ *
+ * But the actual problem is caused because you have too many UTXOs on the addresses in the wallet.
+ * Consolidating funds is currently not supported by the cli wallet on the master branch but it is on develop.
+ * However, you should be able to also do this manually by sending transactions to yourself with a smaller balance than your total.
+ *
+ * Todo: consolidate function send total sum of each token to your own address (after X spent addresses do this) (make it a setting)
+ * Todo: check server how many transactions have been sent to a certain destaddress (make this also a serversetting to override/maximise it)
+ * See https://discord.com/channels/397872799483428865/603609366452502538/836247284961771630
  * Alive api endpoint for autofunds.ddns.net -> if not then spammer only locally
+ *
+ * Node UI mk (vergelijkbaar met wallet address)
  *
  * Use a database instead of json file for addresses
  * LogLevel instelbaar maken via settings of serilog settings file?
@@ -110,7 +124,7 @@ namespace IOTA_Pollen_AutoSendFunds
                     restrictedToMinimumLevel: LogEventLevel.Verbose) //Todo: be configurable
                 .WriteTo.Logger(
                     x => x.Filter.ByIncludingOnly(y => y.ToString().ToLower().Contains("transaction"))
-                        .WriteTo.File("transaction.log", 
+                        .WriteTo.File("transaction.log",
                             rollingInterval: RollingInterval.Day,
                             rollOnFileSizeLimit: true
                         ))
@@ -137,8 +151,10 @@ namespace IOTA_Pollen_AutoSendFunds
             //first check if wallet exist
             if (!CliWallet.Exist(settings.CliWalletFullpath))
             {
-                Log.Logger.Fatal($"Wallet not found! File does not exist: {CliWallet.DefaultWalletFile(settings.CliWalletFullpath)}");
-                CleanExit(1);
+                Log.Logger.Warning($"Wallet not found! File does not exist: {CliWallet.DefaultWalletFile(settings.CliWalletFullpath)}");
+                //CleanExit(1);
+                Log.Logger.Information("Creating new wallet!");
+                await CliWallet.Init();
             }
 
             await UpdateSettings(settingsFile);
@@ -172,7 +188,7 @@ namespace IOTA_Pollen_AutoSendFunds
             Node node = new Node(nodeUrl);
             if (settings.PublishWebApiUrlOfNodeTakenFromWallet) nodeService.Add(node);
             else nodeService.Delete(nodeUrl);
-            
+
 
             List<Address> receiveAddresses = addressService.GetAll(Program.settings.VerifyIfReceiveAddressesExist).ToList();
             //only consider receiveAddresses of other persons
@@ -188,20 +204,19 @@ namespace IOTA_Pollen_AutoSendFunds
             Random random = new Random();
             int receiveAddressIndex = -1;
 
+            bool waitForAnyPositiveBalance = false;
             while (true)
             {
 
                 await cliWallet.UpdateBalances();
-
-                Log.Logger.Information(cliWallet.ToString());
 
                 var balancePicked = new { Color = "", Value = 0 }; //init to make compiler happy
                 bool resultRequestFunds = true;
                 do
                 {
                     //pick random token
-                    balancePicked = cliWallet.Balances
-                        //.Where(balance => balance.BalanceStatus == BalanceStatus.Ok)
+                    var filtered = cliWallet.Balances
+                        .Where(balance => balance.BalanceStatus == BalanceStatus.Ok)
                         .Where(balance => settings.TokensToSent.Contains(balance.TokenName)) //only consider tokens from the settings
                         .GroupBy(balance => balance.Color)  //groupby Color (which is unique)
                         .Select(group => new
@@ -210,43 +225,78 @@ namespace IOTA_Pollen_AutoSendFunds
                             Value = group.Sum(x => x.BalanceValue)
                         })
                         .Where(colorToken => colorToken.Value >= settings.MinAmountToSend) //only with enough balance
+                        .ToList();
+
+                    balancePicked = filtered
                         .RandomElement();
+
+                    if (waitForAnyPositiveBalance && balancePicked != null)
+                    {
+                        Log.Logger.Information(cliWallet.ToString());
+                        waitForAnyPositiveBalance = false;
+                    }
+
+                    if (!waitForAnyPositiveBalance) Log.Logger.Information(cliWallet.ToString());
 
                     if (balancePicked == null)
                     {
-                        Log.Logger.Warning($"None of these tokens {String.Join(", ", settings.TokensToSent)} have a balance with at least {settings.MinAmountToSend}!");
+                        string tokens = String.Join(", ", settings.TokensToSent);
+                        if (!waitForAnyPositiveBalance && balancePicked == null) Log.Logger.Warning($"None of the tokens '{tokens}' have a Ok balance with at least {settings.MinAmountToSend}!");
                         if (settings.StopWhenNoBalanceWithCreditIsAvailable)
                         {
                             CleanExit(0);
                         }
-                        else
+                        //als er geen pending IOTA balance is dan request funds
+                        else if (settings.TokensToSent.Contains("IOTA") && !cliWallet.Balances.Any(balance => balance.Color == "IOTA" && balance.BalanceStatus == BalanceStatus.Pending))
                         {
                             resultRequestFunds = await cliWallet.RequestFunds();
                         }
+                        else
+                        {
+                            if (!waitForAnyPositiveBalance) Log.Logger.Information($"Waiting for any of above tokens to arrive!");
+                            waitForAnyPositiveBalance = true;
+                            Thread.Sleep(1000);
+                            break;
+                        }
                     }
+                    else waitForAnyPositiveBalance = false;
                 } while (balancePicked == null && (resultRequestFunds));
 
                 if (!resultRequestFunds) CleanExit(1);
 
-                //random amount respecting available balanceValue
-                int min = Math.Min(settings.MinAmountToSend, balancePicked.Value);
-                int max = Math.Min(settings.MaxAmountToSend, balancePicked.Value);
-                int amount = random.Next(min, max);
+                if (balancePicked != null)
+                {
+                    //random amount respecting available balanceValue
+                    int min = Math.Min(settings.MinAmountToSend, balancePicked.Value);
+                    int max = Math.Min(settings.MaxAmountToSend, balancePicked.Value);
+                    int amount = random.Next(min, max);
 
-                //pick next destination address
-                if (settings.PickRandomDestinationAddress) //random
-                    receiveAddressIndex = random.Next(receiveAddresses.Count);
-                else //sequential
-                    receiveAddressIndex = (receiveAddressIndex + 1) % receiveAddresses.Count;
+                    //pick next destination address
+                    if (settings.PickRandomDestinationAddress) //random
+                        receiveAddressIndex = random.Next(receiveAddresses.Count);
+                    else //sequential
+                        receiveAddressIndex = (receiveAddressIndex + 1) % receiveAddresses.Count;
 
-                Address address = receiveAddresses[receiveAddressIndex];
-                await CliWallet.SendFunds(amount, address, balancePicked.Color);
+                    Address address = receiveAddresses[receiveAddressIndex];
+                    await cliWallet.SendFunds(amount, address, balancePicked.Color);
 
 
-                int remainingTimeBetweenTransactions = settings.WaitingTimeInSecondsBetweenTransactions;
+                    int remainingTimeBetweenTransactions = settings.WaitingTimeInSecondsBetweenTransactions;
+                    while (remainingTimeBetweenTransactions > 0)
+                    {
+                        if (remainingTimeBetweenTransactions == settings.WaitingTimeInSecondsBetweenTransactions)
+                            Log.Logger.Debug($"\nSleeping between transactions:");
+                        Log.Logger.Debug($" {remainingTimeBetweenTransactions}");
+
+                        Thread.Sleep(1000);
+                        remainingTimeBetweenTransactions--;
+
+                        if (remainingTimeBetweenTransactions == 0) Log.Logger.Information("");
+                    }
+                }
 
                 bool pause = false;
-                while (Console.KeyAvailable || (pause) || (remainingTimeBetweenTransactions > 0))
+                while (Console.KeyAvailable || (pause))
                 {
                     if (Console.KeyAvailable || (pause))
                     {
@@ -257,7 +307,7 @@ namespace IOTA_Pollen_AutoSendFunds
                             if (pause) pause = false; //continue
                             else
                             {
-                                Log.Logger.Information("Pausing... Press <space> to continue, B = Balance, <escape> to quit!");
+                                Log.Logger.Information("Pausing... Press <space> to continue, B = Balance, R = Reload Addresses and Config, <escape> to quit!");
                                 pause = true;
                             }
                         }
@@ -267,18 +317,13 @@ namespace IOTA_Pollen_AutoSendFunds
                             await cliWallet.UpdateBalances();
                             Log.Logger.Information(cliWallet.ToString());
                         }
-                    }
 
-                    if (!pause && remainingTimeBetweenTransactions > 0)
-                    {
-                        if (remainingTimeBetweenTransactions == settings.WaitingTimeInSecondsBetweenTransactions)
-                            Log.Logger.Debug($"\nSleeping between transactions:");
-                        Log.Logger.Debug($" {remainingTimeBetweenTransactions}");
-
-                        Thread.Sleep(1000);
-                        remainingTimeBetweenTransactions--;
-
-                        if (remainingTimeBetweenTransactions == 0) Log.Logger.Information("");
+                        if (cki.Key == ConsoleKey.R) //reload addresses and config
+                        {
+                            Log.Logger.Information("Reloading addresses and config!");
+                            settings = MiscUtil.LoadSettings(settingsFile);
+                            await cliWallet.UpdateAddresses();
+                        }
                     }
                 }
             }
@@ -316,8 +361,8 @@ namespace IOTA_Pollen_AutoSendFunds
             bool updateUrlWalletReceiveAddresses = (settings.UrlWalletReceiveAddresses.Trim() == "");
             bool updateUrlWalletNode = (settings.UrlWalletNode.Trim() == "");
             if (updateUrlWalletReceiveAddresses) settings.UrlWalletReceiveAddresses = Settings.defaultUrlApiServer;
-            if (updateUrlWalletNode) settings.UrlWalletNode = Settings.defaultUrlApiServer;            
-            
+            if (updateUrlWalletNode) settings.UrlWalletNode = Settings.defaultUrlApiServer;
+
             //write settings back
             await File.WriteAllTextAsync(settingsFile, JsonConvert.SerializeObject(settings, Formatting.Indented));
         }
@@ -342,7 +387,7 @@ namespace IOTA_Pollen_AutoSendFunds
                 if (found)
                 {
                     Log.Logger.Fatal($"Program already running for this wallet: {settings.CliWalletFullpath}");
-                    CleanExit(1);
+                    CleanExit(1, false);
                 }
                 else File.Delete(lockFile);
             }
@@ -374,9 +419,9 @@ namespace IOTA_Pollen_AutoSendFunds
             return settingsFile;
         }
 
-        static void CleanExit(int exitCode = 0)
+        static void CleanExit(int exitCode = 0, bool removeLockFile = true)
         {
-            if (File.Exists(lockFile)) File.Delete(lockFile);
+            if (removeLockFile && File.Exists(lockFile)) File.Delete(lockFile);
             Environment.Exit(exitCode);
         }
     }

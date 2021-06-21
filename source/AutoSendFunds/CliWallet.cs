@@ -36,6 +36,30 @@ namespace IOTA_Pollen_AutoSendFunds
             return File.Exists(cliWalletFile);
         }
 
+        public static async Task Init()
+        {
+            CommandLine commandLine = new CommandLine(Program.settings.CliWalletFullpath, "init");
+            await commandLine.Run();
+
+            if (commandLine.Result.ExitCode != 0)
+            {
+                Log.Logger.Error("Error creating wallet!");
+            }
+        }
+
+        public static async Task ConsolidateFunds()
+        {
+            CommandLine commandLine = new CommandLine(Program.settings.CliWalletFullpath, "consolidate-funds");
+            await commandLine.Run();
+
+            throw new NotImplementedException("Todo!");
+
+            if (commandLine.Result.ExitCode != 0)
+            {
+                Log.Logger.Error("Error consolidating funds!");
+            }
+        }
+
         public async Task UpdateBalances()
         {
             Balances.Clear();
@@ -88,9 +112,9 @@ namespace IOTA_Pollen_AutoSendFunds
             }
         }
 
-        public static async Task SendFunds(int amount, Address destinationAddress, string tokenColor)
+        public async Task SendFunds(int amount, Address destinationAddress, string tokenColor)
         {
-            Log.Logger.Information($"Sending {amount} {tokenColor} to {destinationAddress}");
+            Log.Logger.Information($"Sending {amount} {TokenNameForColor(tokenColor)} to {destinationAddress}");
 
             //run cli-wallet balance and capture output
             string arguments = $"send-funds -amount {amount} -dest-addr {destinationAddress.AddressValue} -color {tokenColor} -access-mana-id {Program.settings.AccessManaId} -consensus-mana-id {Program.settings.ConsensusManaId}";
@@ -101,6 +125,27 @@ namespace IOTA_Pollen_AutoSendFunds
             {
                 Log.Logger.Error(" Error sending funds!");
             }
+
+            //waiting till status is Ok
+            Log.Logger.Information($"Sending complete... waiting for balance status of {TokenNameForColor(tokenColor)} to return to OK...");
+
+            bool failed = false;
+            Stopwatch stopwatch = Stopwatch.StartNew();
+            do
+            {
+                if (stopwatch.Elapsed.TotalSeconds >= Program.settings.MaxWaitingTimeInSecondsForRequestingFunds)
+                {
+                    failed = true;
+                    break;
+                }
+
+                Thread.Sleep(1000);
+                await UpdateBalances();
+
+            } while (Balances.Any(balance =>
+                balance.TokenName.ToUpper() == tokenColor.ToUpper() && balance.BalanceStatus != BalanceStatus.Ok));
+
+            if (failed) Log.Logger.Error($"Requesting {tokenColor} tokens failed to complete within {Program.settings.MaxWaitingTimeInSecondsForRequestingFunds} seconds");
         }
 
         public async Task UpdateAddresses()
@@ -137,6 +182,15 @@ namespace IOTA_Pollen_AutoSendFunds
             {
                 Log.Logger.Error(" Error getting wallet receive addresses!");
             }
+        }
+
+        public string TokenNameForColor(string tokenColor)
+        {
+            string tokenName = Balances
+                    .First(balance => balance.Color == tokenColor) //color is unique so when multiple (2) balances (in case of PEND and Ok balance) just take first
+                    .TokenName;
+
+            return tokenName;
         }
 
         public int TotalBalanceOfTokenByColor(string color)
@@ -196,7 +250,8 @@ namespace IOTA_Pollen_AutoSendFunds
 
                     Log.Logger.Information($" {stopwatch.Elapsed.Seconds}");
                 }
-            } while (TotalBalanceOfTokenByColor("IOTA") <= balanceAtStart);
+            } while ((TotalBalanceOfTokenByColor("IOTA") <= balanceAtStart) || (Balances.Any(balance =>
+                balance.TokenName.ToUpper() == "IOTA" && balance.BalanceStatus != BalanceStatus.Ok))); ;
 
             if (!firstPrintFlag) Log.Logger.Information("");
 
@@ -208,7 +263,7 @@ namespace IOTA_Pollen_AutoSendFunds
         public override string ToString()
         {
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append($"CliWallet '{Program.settings.WalletName}':\n");
+            stringBuilder.Append($"CliWallet '{Program.settings.WalletName}' ReceiveAddress {ReceiveAddress.AddressValue}:\n");
 
             if (Balances.Count == 0) stringBuilder.Append(" Empty! No balances found!");
             else
