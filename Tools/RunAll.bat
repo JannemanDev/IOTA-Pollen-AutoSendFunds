@@ -1,0 +1,11 @@
+cd c:\temp\iota\newwallet1
+start run.bat
+timeout 2
+cd c:\temp\iota\newwallet2
+start run.bat
+timeout 2
+cd c:\temp\iota\newwallet3
+start run.bat
+timeout 2
+cd c:\temp\iota\newwallet4
+start run.bat

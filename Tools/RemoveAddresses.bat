@@ -1,0 +1,1 @@
+powershell -Command "& {$obj = Get-Content -Path addresses.json -Raw | ConvertFrom-Json; $obj.addresses = $obj.addresses.where({($_.ownerName -ne 'MyWallet 1') -and ($_.ownerName -ne 'MyWallet 2') -and ($_.ownerName -ne 'MyWallet 3') -and ($_.ownerName -ne 'MyWallet 4')}); $obj | ConvertTo-Json -Depth 100 | Out-File addresses.json -Force;} "
