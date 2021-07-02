@@ -18,5 +18,5 @@
   "WaitForPreviousTransactionToFinish": true,
   "ShowOutputCliWallet": false,
   "PickRandomDestinationAddress": true,
-  "MaxWaitingTimeInSecondsForRequestingFunds": 60
+  "MaxWaitingTimeInSecondsForRequestingFunds": 90
 }

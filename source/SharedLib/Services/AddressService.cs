@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using RestSharp;
 using SharedLib.Interfaces;
 using SharedLib.Models;
@@ -12,6 +13,9 @@ namespace SharedLib.Services
 
         public AddressService(ICrudRepo<Address> addressRepo, string dashboardUrl)
         {
+            if (addressRepo == null) throw new ArgumentException("Argument addressRepo can not be null!");
+            if (dashboardUrl == null) throw new ArgumentException("Argument dashboardUrl can not be null");
+
             _addressRepo = addressRepo;
             _dashboardClient = new RestClient(dashboardUrl);
         }

@@ -189,17 +189,7 @@ namespace IOTA_Pollen_AutoSendFunds
             if (settings.PublishWebApiUrlOfNodeTakenFromWallet) nodeService.Add(node);
             else nodeService.Delete(nodeUrl);
 
-
-            List<Address> receiveAddresses = addressService.GetAll(Program.settings.VerifyIfReceiveAddressesExist).ToList();
-            //only consider receiveAddresses of other persons
-            receiveAddresses = receiveAddresses
-                .Where(receiveAddress => !receiveAddress.Equals(cliWallet.ReceiveAddress)).ToList();
-
-            if (receiveAddresses.Count == 0)
-            {
-                Log.Logger.Fatal($"No other receive addresses available at {Program.settings.UrlWalletReceiveAddresses}! Exiting...");
-                CleanExit(1);
-            }
+            List<Address> receiveAddresses = LoadReceiveAddresses(cliWallet, addressService);
 
             Random random = new Random();
             int receiveAddressIndex = -1;
@@ -322,11 +312,27 @@ namespace IOTA_Pollen_AutoSendFunds
                         {
                             Log.Logger.Information("Reloading addresses and config!");
                             settings = MiscUtil.LoadSettings(settingsFile);
-                            await cliWallet.UpdateAddresses();
+                            receiveAddresses = LoadReceiveAddresses(cliWallet, addressService);
                         }
                     }
                 }
             }
+        }
+
+        private static List<Address> LoadReceiveAddresses(CliWallet cliWallet, AddressService addressService)
+        {
+            List<Address> receiveAddresses = addressService.GetAll(Program.settings.VerifyIfReceiveAddressesExist).ToList();
+            //only consider receiveAddresses of other persons
+            receiveAddresses = receiveAddresses
+                .Where(receiveAddress => !receiveAddress.Equals(cliWallet.ReceiveAddress)).ToList();
+
+            if (receiveAddresses.Count == 0)
+            {
+                Log.Logger.Fatal($"No other receive addresses available at {Program.settings.UrlWalletReceiveAddresses}! Exiting...");
+                CleanExit(1);
+            }
+
+            return receiveAddresses;
         }
 
         private static async Task UpdateSettings(string settingsFile)
