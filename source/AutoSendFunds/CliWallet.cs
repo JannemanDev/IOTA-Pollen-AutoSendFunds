@@ -43,7 +43,7 @@ namespace IOTA_Pollen_AutoSendFunds
 
             if (commandLine.Result.ExitCode != 0)
             {
-                Log.Logger.Error("Error creating wallet!");
+                Log.Logger.Error($"Error creating wallet: {commandLine.Result.StandardError}");
             }
         }
 
