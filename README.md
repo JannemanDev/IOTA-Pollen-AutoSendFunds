@@ -6,14 +6,14 @@ For Synology DS720+ use linux-x64 build. Ignore the warning about missing file.
 ## Prerequisites
 
 -A working and synced node  
--A working CLI-Wallet (configurable through it's own config.json)  
+-At least 1 working Cli-Wallet (configurable through it's own config.json)  
  Use the one released with the GoShimmer build:  
 	https://github.com/iotaledger/goshimmer/releases/
 
 Important to use the  
 	Latest Pollen GUI Wallet: https://github.com/iotaledger/pollen-wallet/releases/  
 	Latest node and CLI-Wallet: https://github.com/iotaledger/goshimmer/releases/  
-	Latest node software as Docker image: https://hub.docker.com/r/iotaledger/goshimmer/tags?page=1&ordering=last_updated&name=latest
+	Latest node software for example as Docker image: https://hub.docker.com/r/iotaledger/goshimmer/tags?page=1&ordering=last_updated&name=latest
 
 ## Dependencies
     
@@ -36,32 +36,39 @@ Linux: `IOTA-Pollen-AutoSendFunds [settingsFile]`
 settingsFile is optional, by default `settings.json` from current directory will be used.  
 An example `settings.json` is supplied.
 
+At least review/update the settings.json (more info read further down below):
+-CliWalletFullpath
+-UrlWalletReceiveAddresses
+-UrlWalletNode
+-GoShimmerDashboardUrl
+
 When using the application:  
  Press escape to quit  
  Press space to pause
  Press B to show balance of wallet
+ Press R to reload addresses.json and config.json
  
 ## Settings - settings.json
 
 ### CliWalletFullpath
 
-Full path to the cli-wallet. Be sure to use the correct version. See Prerequisites.
-Double check if it runs correctly and has a balance.
-You can only run one instance of IOTA-Pollen-AutoSendFunds for each cli-wallet!
+Full path to a cli-wallet. Be sure to use the correct version. See Prerequisites.
+Double check if cli-wallet runs correctly.
+You can only run one instance of IOTA-Pollen-AutoSendFunds for each cli-wallet (this is auto-checked at runtime).
 
 ### AccessManaId
 
-Optional, by default it uses your (full) identityID. For this the WebAPI setting is used from the wallet `config.json`, this points to http://node.url:8080/info
+Optional, when left empty it uses your (full) identityID taken by using the `WebAPI` setting from the wallet `config.json`. You can find it yourself by going to http://node.url:8080/info
 
 ### ConsensusManaId
 
-Optional, by default it uses your (full) identityID. For this the WebAPI setting is used from the wallet `config.json`, this points to http://node.url:8080/info
+Optional, when left empty it uses your (full) identityID taken by using the `WebAPI` setting from the wallet `config.json`. You can find it yourself by going to http://node.url:8080/info
 
 ### UrlWalletReceiveAddresses
 
 Two options:
-* You can use a local .json file. An example file is provided in folder `Receiving addresses`
-* Use an url which points to a .json file. For example the central AddressBook webservice where receiving wallet addresses are stored from other users located at: ...
+* You can use a fullpath to a local .json file. It will be auto populated, if you set `PublishReceiveAddress` from `settings.json`, when you run a cli-wallet. If not set you can use an example file which is provided in folder `Resources`
+(work in progress) * Use an url which points to a .json file. For example the central AddressBook webservice where receiving wallet addresses are stored from other users located at: ...
 
 ### VerifyIfReceiveAddressesExist
 
@@ -82,7 +89,7 @@ Here you can set which tokens will be available to sent. From this set will be r
 
 ### StopWhenNoBalanceWithCreditIsAvailable
 
-When there is not any positive balance availble left the program will stop when set to true.
+When there is not any positive balance available left the program will stop when set to true.
 
 ### WaitingTimeInSecondsBetweenTransactions
 
