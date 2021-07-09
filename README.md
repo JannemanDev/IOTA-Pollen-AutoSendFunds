@@ -1,6 +1,6 @@
 # IOTA-Pollen-AutoSendFunds
 
-All builds can be found in \bin folder. 
+All builds can be found in `Releases`. 
 For Synology DS720+ use linux-x64 build. Ignore the warning about missing file.
 
 ## Prerequisites
