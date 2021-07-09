@@ -37,16 +37,16 @@ settingsFile is optional, by default `settings.json` from current directory will
 An example `settings.json` is supplied.
 
 At least review/update the settings.json (more info read further down below):
--CliWalletFullpath
--UrlWalletReceiveAddresses
--UrlWalletNode
--GoShimmerDashboardUrl
+-CliWalletFullpath  
+-UrlWalletReceiveAddresses  
+-UrlWalletNode  
+-GoShimmerDashboardUrl  
 
 When using the application:  
  Press escape to quit  
- Press space to pause
- Press B to show balance of wallet
- Press R to reload addresses.json and config.json
+ Press space to pause  
+ Press B to show balance of wallet  
+ Press R to reload addresses.json and config.json  
  
 ## Settings - settings.json
 
