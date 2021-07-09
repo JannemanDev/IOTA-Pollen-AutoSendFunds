@@ -34,9 +34,9 @@ Windows: `IOTA-Pollen-AutoSendFunds.exe [settingsFile]`
 Linux: `IOTA-Pollen-AutoSendFunds [settingsFile]`  
 
 settingsFile is optional, by default `settings.json` from current directory will be used.  
-An example `settings.json` is supplied.
+An example `settings.json` is supplied with each build.
 
-At least review/update the settings.json (more info read further down below):
+At least review/update the settings.json (more info read further down below):  
 -CliWalletFullpath  
 -UrlWalletReceiveAddresses  
 -UrlWalletNode  
