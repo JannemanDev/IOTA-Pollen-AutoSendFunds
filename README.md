@@ -68,7 +68,7 @@ Optional, when left empty it uses your (full) identityID taken by using the `Web
 
 Two options:
 * You can use a fullpath to a local .json file. It will be auto populated, if you set `PublishReceiveAddress` from `settings.json`, when you run a cli-wallet. If not set you can use an example file which is provided in folder `Resources`
-(work in progress) * Use an url which points to a .json file. For example the central AddressBook webservice where receiving wallet addresses are stored from other users located at: ...
+* (work in progress) Use an url which points to a .json file. For example the central AddressBook webservice where receiving wallet addresses are stored from other users located at: ...
 
 ### VerifyIfReceiveAddressesExist
 
