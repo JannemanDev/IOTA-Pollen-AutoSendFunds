@@ -9,7 +9,7 @@ AutoSendFunds currently only use a local .json file to store, load and select ra
 
 To do:  
 -use a local .json file to store, load and select a node to connect to  
--a website where users can share their wallet address and node ip/port. AutoSendFunds users can optionally load random destination wallet and node info from.  
+-a website/API where users can share their wallet address and/or node ip/port. AutoSendFunds users can choose to load random destination wallet and node info from this website/API in `settings.json`.  
 
 ## Prerequisites
 
