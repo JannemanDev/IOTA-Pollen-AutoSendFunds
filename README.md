@@ -3,6 +3,14 @@
 All builds can be found in `Releases`.  
 For Synology DS720+ use linux-x64 build. Ignore the warning about missing file.
 
+## Roadmap / to do / work in progress
+
+AutoSendFunds currently only use a local .json file to store, load and select random wallet addresses from.  
+
+To do:  
+-use a local .json file to store, load and select a node to connect to  
+-a website where users can share their wallet address and node ip/port. AutoSendFunds users can optionally load random destination wallet and node info from.  
+
 ## Prerequisites
 
 -A working and synced node  
@@ -111,5 +119,3 @@ If false this will be done sequentially.
 ### MaxWaitingTimeInSecondsForRequestingFunds
 
 Time to wait in seconds for requesting funds to complete
-
-## Roadmap / to do
