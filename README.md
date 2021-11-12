@@ -6,7 +6,7 @@ For Synology DS720+ use `linux-x64` build. Ignore the warning about missing file
 ## Prerequisites
 
 -A working and synced node  
--At least 1 working Cli-Wallet (configurable through it's own config.json)  
+-At least 1 working Cli-Wallet (configurable through it's own `config.json`)  
  Use the one released with the GoShimmer build:  
 	https://github.com/iotaledger/goshimmer/releases/
 
