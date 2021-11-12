@@ -118,4 +118,4 @@ If false this will be done sequentially.
 
 ### MaxWaitingTimeInSecondsForRequestingFunds
 
-Time to wait in seconds for requesting funds to complete
+Maximum time to wait in seconds for requesting funds to complete
