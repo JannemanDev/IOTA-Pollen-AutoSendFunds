@@ -48,6 +48,39 @@ When using the application:
  Press B to show balance of wallet  
  Press R to reload addresses.json and config.json  
  
+## How to use as a spammer
+
+-Make multiple folders with each a copy of a `cli-wallet`. Verify that is running correctly. 
+-Run `IOTA-Pollen-AutoSendFunds.exe` from each directory where you use the following `settings.json` where X is wallet number, be sure to update the `GoShimmerDashboardUrl`:
+
+```json
+{
+  "WalletName": "Wallet X",
+  "PublishReceiveAddress": true,
+  "PublishWebApiUrlOfNodeTakenFromWallet": true,
+  "CliWalletFullpath": "c:\\temp\\iota\\wallet X\\cli-wallet.exe",
+  "AccessManaId": "",
+  "ConsensusManaId": "",
+  "UrlWalletReceiveAddresses": "c:\\temp\\iota\\addresses.json",
+  "UrlWalletNode": "c:\\temp\\iota\\nodes.json",
+  "VerifyIfReceiveAddressesExist": false,
+  "GoShimmerDashboardUrl": "http://node.url:8081",
+  "MinAmountToSend": 1,
+  "MaxAmountToSend": 40,
+  "TokensToSent": [
+    "IOTA",
+    "Janneman2",
+    "XV2"
+  ],
+  "StopWhenNoBalanceWithCreditIsAvailable": false,
+  "WaitingTimeInSecondsBetweenTransactions": 0,
+  "WaitForPreviousTransactionToFinish": "true",
+  "ShowOutputCliWallet": false,
+  "PickRandomDestinationAddress": true,
+  "MaxWaitingTimeInSecondsForRequestingFunds": 90
+}
+```
+
 ## Settings - settings.json
 
 ### CliWalletFullpath
@@ -67,7 +100,7 @@ Optional, when left empty it uses your (full) identityID taken by using the `Web
 ### UrlWalletReceiveAddresses
 
 Two options:
-* You can use a fullpath to a local .json file. It will be auto populated, if you set `PublishReceiveAddress` from `settings.json`, when you run a cli-wallet. If not set you can use an example file which is provided in folder `Resources`
+* You can use a fullpath to a local .json file. This file will be auto populated if you set `PublishReceiveAddress` from `settings.json` when you run `IOTA-Pollen-AutoSendFunds.exe`. You can use an example file which is provided in folder `Resources` which already contains dozens of addresses taken from Discord #goshimmer channel.
 * (work in progress) Use an url which points to a .json file. For example the central AddressBook webservice where receiving wallet addresses are stored from other users located at: ...
 
 ### VerifyIfReceiveAddressesExist
