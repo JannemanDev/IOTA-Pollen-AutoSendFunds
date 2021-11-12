@@ -50,7 +50,7 @@ When using the application:
  
 ## How to use as a spammer
 
--Make multiple folders with each a copy of a `cli-wallet`. Verify that is running correctly. 
+-Make multiple folders with each a copy of a `cli-wallet`. Verify that is running correctly.   
 -Run `IOTA-Pollen-AutoSendFunds.exe` from each directory where you use the following `settings.json` where X is wallet number, be sure to update the `GoShimmerDashboardUrl`:
 
 ```json
