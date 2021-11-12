@@ -2,12 +2,12 @@
   "addresses": [
     {
       "ownerName": "MaKla",
-      "addressValue": "12yH4NuDdNMcbovhiXPg4kAL6xKbxopS8bT6ZrpTroXXs",
+      "addressValue": "1DuNdQ9bVXeWArDqdqWgm9nuM9Hj7f6fEype7MirygQXg",
       "isVerified": true
     },
     {
       "ownerName": "MyMonk089",
-      "addressValue": "19xi7exrFyhPm4GtasT4XLTJLVTHykzvoSHFeZrLJ7Vh",
+      "addressValue": "1757B8Er1gPKjsTBSDYGJSve4fLHBdbjE1xYdFmQpr38G",
       "isVerified": true
     },
     {
@@ -57,12 +57,12 @@
     },
     {
       "ownerName": "huggre",
-      "addressValue": "16mYweDoH1shSsZV5FQ6WQSSBMfPKDm2c1RhTDHeLNCyK",
+      "addressValue": "1A7AZdJXMGe6TEWdrPqCwZKxYKaJby5BMSViimav7HcZe",
       "isVerified": true
     },
     {
       "ownerName": "ZigZag",
-      "addressValue": "1ANympgu94pf6SJ9W8bBksLWBnJHVbNiS5aZfr9bsJtZC",
+      "addressValue": "1H3dMm6z8xxrKQH4sydUDtLDnqVbmQjbogMTkdLKtgKPG",
       "isVerified": true
     },
     {
@@ -76,38 +76,83 @@
       "isVerified": true
     },
     {
+      "ownerName": "adamski",
+      "addressValue": "19QQJK9zJ8nupe8V8Q3siLv4G4RrWeyCfPAFc4XFnN2g2",
+      "isVerified": true
+    },
+    {
+      "ownerName": "wadada",
+      "addressValue": "18H5Xyv2kdmmTvfnaLyqqsErBaTAK7fxneugFmvDurYmg",
+      "isVerified": true
+    },
+    {
+      "ownerName": "bram",
+      "addressValue": "1E5C7zf8QmzmVdyX8ptCpchGpWiKTN1Y288kkwR5XYDaN",
+      "isVerified": true
+    },
+    {
+      "ownerName": "newbie",
+      "addressValue": "18kVq3tMgPLqpZqsSbtXp8gALAem3kzZ9PpkWUWLbzru1",
+      "isVerified": true
+    },
+    {
+      "ownerName": "julbock",
+      "addressValue": "1HULDjc7qyYv62QwKrkDG2KREruV4K6rsqL2HAeeuK99d",
+      "isVerified": true
+    },
+    {
+      "ownerName": "NFT_IOTA",
+      "addressValue": "1CiV9hkAsXQM2KA2ob3tWrbxtsY7HBxZQogo1kEPM2mj9",
+      "isVerified": true
+    },    
+    {
+      "ownerName": "HD",
+      "addressValue": "136S8sngFgi3Z6fJKPxQv6bXKr4e6ofafd6LpQTUgLndx",
+      "isVerified": true
+    },
+	{
+      "ownerName": "Oliver",
+      "addressValue": "19oBvL3pLxqA9H3pm1pq1DEPNYtMyJGvMXb6HPEWhkYkc",
+      "isVerified": true
+    }, 	
+	{
+      "ownerName": "NO8ODY",
+      "addressValue": "1FVxWzVoof3dJey4LqQXye8RgDczXXcaABbUforjv7FxD",
+      "isVerified": true
+    }, 	
+	{
+      "ownerName": "Ryo San",
+      "addressValue": "19aeLZuSmsRxrYcwWwzDYrzW4NV2xZJVf344sPnWjRRi8",
+      "isVerified": true
+    },	
+	{
+      "ownerName": "John Dela",
+      "addressValue": "1DcjYyVGe2YPuSPWzTNQHVkKhV3heZUFetpAitpLrNv25",
+      "isVerified": true
+    },    
+	{
       "ownerName": "IOTA 2.0 DevNet Wallet",
-      "addressValue": "19Si8vpEXzajeoM2bGwwx1AMrkwu6G7aifawLwUMGB5uw",
+      "addressValue": "1G72yeXz71gJBTV6YbwnvNYRaSCqXG9bnfBUKzGvo4gEm",
       "isVerified": true
     },
     {
       "ownerName": "MyWallet 1",
-      "addressValue": "16aJrh3rU3eh9X4EXhsw4bnZe9Mf9g3gRXyC29RBuVyn7",
+      "addressValue": "1EAPdTeAy9f3oqSmg5EWQdhQh77bjDeNQ8jsV5ghdFAJp",
+      "isVerified": true
+    },
+    {
+      "ownerName": "MyWallet 2",
+      "addressValue": "1FfsQBnzw5sLkAXyTDdS5AYg6fQVQdAhwgL3uQXofamqB",
       "isVerified": true
     },
     {
       "ownerName": "MyWallet 3",
-      "addressValue": "1CzQHRv7LoaYNV23DBcEWaqawZ6LgYKCU3wUiVpvMvmdq",
+      "addressValue": "1E6HuAWESY8xegQDuF1iA1cKgiuPrSZW2jXnjAXJj1VT7",
       "isVerified": true
     },
     {
       "ownerName": "MyWallet 4",
-      "addressValue": "1B3rg4yt3ywsAe1dhrqGm5HezSABm7A1tUiSC2nBCEW1U",
-      "isVerified": true
-    },
-    {
-      "ownerName": "MyWallet 2",
-      "addressValue": "13xyz29gKWb3ZfR8YWPGppBXNmtt7konXwZkw6E9CN84J",
-      "isVerified": true
-    },
-    {
-      "ownerName": "MyWallet 2",
-      "addressValue": "1DxFQKy6SPwwpj1hpSbMxhnKhwbiTgoEj4XDc7eEsmsoo",
-      "isVerified": true
-    },
-    {
-      "ownerName": "MyWallet 2",
-      "addressValue": "12ZCBCE1siiP6i7jggrwhtXSL8MxrD4w21yiaVCEqBtHp",
+      "addressValue": "1FmudKkftU83X5nEiGf1ZQpnm8C2j1hxyEfppqZvP9gT4",
       "isVerified": true
     }
   ]
