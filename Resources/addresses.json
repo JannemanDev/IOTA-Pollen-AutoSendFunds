@@ -141,6 +141,16 @@
       "isVerified": true
     },
     {
+      "ownerName": "Instrumental",
+      "addressValue": "18XG4RWX5AbQZTXeh9FaVHrTJRjEtbbAeGJswimwyTwDU",
+      "isVerified": true
+    },
+    {
+      "ownerName": "Snowli",
+      "addressValue": "1HxFYNivhtharA7fnwKgkCVTFpMp3Nke53Dj8DwTKsVAm",
+      "isVerified": true
+    },
+    {
       "ownerName": "IOTA 2.0 DevNet Wallet",
       "addressValue": "1G72yeXz71gJBTV6YbwnvNYRaSCqXG9bnfBUKzGvo4gEm",
       "isVerified": true
@@ -161,8 +171,18 @@
       "isVerified": true
     },
     {
+      "ownerName": "MyWallet 2 NAS",
+      "addressValue": "1Gn7g54VkNaA7rquNmVxdUKBAV7asWu222kxViXpkL35x",
+      "isVerified": true
+    },
+    {
       "ownerName": "MyWallet 4",
       "addressValue": "1HmW3DNc2dT9EKnLU1jqJjTFkAWiF9Axdpq8hxzhxhxw9",
+      "isVerified": true
+    },
+    {
+      "ownerName": "MyWallet 1 NAS",
+      "addressValue": "16esp1i2yGVXWerdSfDwNDegmUsgR5xM84kMTHYdjqC1w",
       "isVerified": true
     }
   ]
