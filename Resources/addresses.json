@@ -104,55 +104,65 @@
       "ownerName": "NFT_IOTA",
       "addressValue": "1CiV9hkAsXQM2KA2ob3tWrbxtsY7HBxZQogo1kEPM2mj9",
       "isVerified": true
-    },    
+    },
     {
       "ownerName": "HD",
       "addressValue": "136S8sngFgi3Z6fJKPxQv6bXKr4e6ofafd6LpQTUgLndx",
       "isVerified": true
     },
-	{
+    {
       "ownerName": "Oliver",
       "addressValue": "19oBvL3pLxqA9H3pm1pq1DEPNYtMyJGvMXb6HPEWhkYkc",
       "isVerified": true
-    }, 	
-	{
+    },
+    {
       "ownerName": "NO8ODY",
       "addressValue": "1FVxWzVoof3dJey4LqQXye8RgDczXXcaABbUforjv7FxD",
       "isVerified": true
-    }, 	
-	{
+    },
+    {
       "ownerName": "Ryo San",
       "addressValue": "19aeLZuSmsRxrYcwWwzDYrzW4NV2xZJVf344sPnWjRRi8",
       "isVerified": true
-    },	
-	{
+    },
+    {
       "ownerName": "John Dela",
       "addressValue": "1DcjYyVGe2YPuSPWzTNQHVkKhV3heZUFetpAitpLrNv25",
       "isVerified": true
-    },    
-	{
+    },
+    {
+      "ownerName": "mrstormlars",
+      "addressValue": "13pshNKdeHDY6B2nqPQhxLUw2WEovzh2LVCECtZAuPk3i",
+      "isVerified": true
+    },
+    {
+      "ownerName": "iodata13",
+      "addressValue": "15mVaBRg7o2qd9839Cx3nD5nexJ5EWkQ4fv3mtM3XSmM8",
+      "isVerified": true
+    },
+    {
       "ownerName": "IOTA 2.0 DevNet Wallet",
       "addressValue": "1G72yeXz71gJBTV6YbwnvNYRaSCqXG9bnfBUKzGvo4gEm",
       "isVerified": true
     },
     {
-      "ownerName": "MyWallet 1",
-      "addressValue": "1EAPdTeAy9f3oqSmg5EWQdhQh77bjDeNQ8jsV5ghdFAJp",
+      "ownerName": "MyWallet 2",
+      "addressValue": "1B1CvavSSGCMpPCwhsYnrjaEgZaXeWYP1VsmRoQuygDdm",
       "isVerified": true
     },
     {
-      "ownerName": "MyWallet 2",
-      "addressValue": "1FfsQBnzw5sLkAXyTDdS5AYg6fQVQdAhwgL3uQXofamqB",
+      "ownerName": "MyWallet 1",
+      "addressValue": "1Amwa4YS4qwsA8Ubyk81k2ohPynA2Ya5hUpW2reCSCPVo",
       "isVerified": true
     },
     {
       "ownerName": "MyWallet 3",
-      "addressValue": "1E6HuAWESY8xegQDuF1iA1cKgiuPrSZW2jXnjAXJj1VT7",
+      "addressValue": "1133JqDW5S49A3nS7uVjx57dGdsvVULzsrChQ94tN5YRe",
       "isVerified": true
     },
     {
       "ownerName": "MyWallet 4",
-      "addressValue": "1FmudKkftU83X5nEiGf1ZQpnm8C2j1hxyEfppqZvP9gT4",
+      "addressValue": "1HmW3DNc2dT9EKnLU1jqJjTFkAWiF9Axdpq8hxzhxhxw9",
       "isVerified": true
     }
   ]
