@@ -22,7 +22,8 @@ using SimpleBase;
 
 /*
  * "I noticed cli-wallet.exe changed it behaviour when sending funds for example... now you can't send two transactions in a row when balance is still pending."
- * "If you have all your funds on the same output, how do you expect to send the second tx when the first tx spent that output? In this case, you need to wait until the first tx confirms, so you have available funds in the wallet.
+ * "If you have all your funds on the same output, how do you expect to send the second tx when the first tx spent that output? 
+ *  In this case, you need to wait until the first tx confirms, so you have available funds in the wallet.
  *  If however you have let's say 100-100 funds on two outputs, you can send two txs spending these simultaneously, because there is no dependency between the txs."
  *
  * But the actual problem is caused because you have too many UTXOs on the addresses in the wallet.
@@ -56,10 +57,12 @@ using SimpleBase;
  * output headers wegparsen ? bijv. bij Balance opvragen via dashboard
  * error: weghalen indien geen error!
  *
- * auto wallet create
- * auto (re)request funds
- * make an option for: use same receive adress or use unspent adres
- * save wallet address in api repo
+ * v auto wallet create
+ * v auto (re)request funds
+ * - wallet webapi node kiezen uit nodes repo
+ * - nodes uit nodes.json kunnen disablen/enablen
+ * - make an option for: use same receive adress or use unspent adres
+ * - save wallet address in api repo
  * v bij wegschrijven json eerst opmaken
 
  * Netwerkversion en versie bewaren en alles hieraan hangen (log, nodes, ...)
@@ -104,6 +107,8 @@ using SimpleBase;
 //-test requestFunds
 //-test filtering on tokenstosent
 //-test with colored tokens -> color token is uniek (=address), tokenname hoeft niet uniek te zijn?!
+//-after each trans. show stats like total send, average conf.time, ...
+//-autocreate minted tokens and add them to the settings: TokensToSent
 
 namespace IOTA_Pollen_AutoSendFunds
 {
@@ -118,7 +123,7 @@ namespace IOTA_Pollen_AutoSendFunds
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Verbose() //send all events to sinks
                 .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information) //Todo: be configurable
-                .WriteTo.File("log.txt",
+                .WriteTo.File("Logs/log.txt",
                     rollingInterval: RollingInterval.Day,
                     rollOnFileSizeLimit: true,
                     restrictedToMinimumLevel: LogEventLevel.Verbose) //Todo: be configurable
@@ -130,7 +135,7 @@ namespace IOTA_Pollen_AutoSendFunds
                         ))
                 .CreateLogger();
 
-            Log.Logger.Information(("Dashboard - IOTA-Pollen-AutoSendFunds v0.1\n"));
+            Log.Logger.Information(("Dashboard - IOTA-Pollen-AutoSendFunds v0.11\n"));
             Log.Logger.Information(" Escape to quit");
             Log.Logger.Information(" Space to pause\n");
 

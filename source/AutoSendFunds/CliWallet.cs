@@ -145,7 +145,7 @@ namespace IOTA_Pollen_AutoSendFunds
             } while (Balances.Any(balance =>
                 balance.TokenName.ToUpper() == tokenColor.ToUpper() && balance.BalanceStatus != BalanceStatus.Ok));
 
-            if (failed) Log.Logger.Error($"Requesting {tokenColor} tokens failed to complete within {Program.settings.MaxWaitingTimeInSecondsForRequestingFunds} seconds");
+            if (failed) Log.Logger.Error($"Sending {amount} {TokenNameForColor(tokenColor)} to {destinationAddress} failed to complete within {Program.settings.MaxWaitingTimeInSecondsForRequestingFunds} seconds");
         }
 
         public async Task UpdateAddresses()
