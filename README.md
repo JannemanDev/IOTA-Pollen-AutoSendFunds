@@ -110,7 +110,7 @@ If set to true all receive addresses are checked if available and valid
 ### GoShimmerDashboardUrl
 
 Points to a node's dashboard, by default this is http://node.url:8081. If empty the node url will be used from the wallet `config.json` with port 8081.
-The dashboard is used to check if receive addresses are available.
+The dashboard is used to check if receive addresses exist and are valid.
 
 ### MinAmountToSend and MaxAmountToSend
 
