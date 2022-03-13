@@ -14,8 +14,8 @@ namespace IOTA_Pollen_AutoSendFunds
 {
     class CliWallet
     {
-        public List<Balance> Balances { get; set; }
-        public List<Address> Addresses { get; set; }
+        public List<Balance> Balances { get; private set; }
+        public List<Address> Addresses { get; private set; }
 
         public Address ReceiveAddress => Addresses.FirstOrDefault();
 
@@ -51,13 +51,6 @@ namespace IOTA_Pollen_AutoSendFunds
         {
             CommandLine commandLine = new CommandLine(Program.settings.CliWalletFullpath, "consolidate-funds");
             await commandLine.Run();
-
-            throw new NotImplementedException("Todo!");
-
-            if (commandLine.Result.ExitCode != 0)
-            {
-                Log.Logger.Error("Error consolidating funds!");
-            }
         }
 
         public async Task UpdateBalances()
@@ -112,18 +105,25 @@ namespace IOTA_Pollen_AutoSendFunds
             }
         }
 
-        public async Task SendFunds(int amount, Address destinationAddress, string tokenColor)
+        public async Task<bool> SendFunds(int amount, Address destinationAddress, string tokenColor, string accessManaId, string consensusManaId)
         {
+            bool result = true;
+
             Log.Logger.Information($"Sending {amount} {TokenNameForColor(tokenColor)} to {destinationAddress}");
 
             //run cli-wallet balance and capture output
-            string arguments = $"send-funds -amount {amount} -dest-addr {destinationAddress.AddressValue} -color {tokenColor} -access-mana-id {Program.settings.AccessManaId} -consensus-mana-id {Program.settings.ConsensusManaId}";
+            string arguments = $"send-funds -amount {amount} -dest-addr {destinationAddress.AddressValue} -color {tokenColor}";
+            //if AccessManaId or ConsensusManaId are not set current connected node will be used by default by cli-wallet
+            if (accessManaId != "") arguments += $" -access-mana-id {accessManaId}";
+            if (consensusManaId != "") arguments += $" -consensus-mana-id {consensusManaId}";
+
             CommandLine commandLine = new CommandLine(Program.settings.CliWalletFullpath, arguments);
             await commandLine.Run();
 
             if (commandLine.Result.ExitCode != 0)
             {
                 Log.Logger.Error(" Error sending funds!");
+                result = false;
             }
 
             //waiting till status is Ok
@@ -146,6 +146,10 @@ namespace IOTA_Pollen_AutoSendFunds
                 balance.TokenName.ToUpper() == tokenColor.ToUpper() && balance.BalanceStatus != BalanceStatus.Ok));
 
             if (failed) Log.Logger.Error($"Sending {amount} {TokenNameForColor(tokenColor)} to {destinationAddress} failed to complete within {Program.settings.MaxWaitingTimeInSecondsForRequestingFunds} seconds");
+
+            result = result && !failed;
+
+            return result;
         }
 
         public async Task UpdateAddresses()
@@ -247,8 +251,6 @@ namespace IOTA_Pollen_AutoSendFunds
                         Log.Logger.Information("Found pending IOTA transaction! Waiting for it to complete...");
                         firstPrintFlag = false;
                     }
-
-                    Log.Logger.Information($" {stopwatch.Elapsed.Seconds}");
                 }
             } while ((TotalBalanceOfTokenByColor("IOTA") <= balanceAtStart) || (Balances.Any(balance =>
                 balance.TokenName.ToUpper() == "IOTA" && balance.BalanceStatus != BalanceStatus.Ok))); ;
@@ -256,6 +258,7 @@ namespace IOTA_Pollen_AutoSendFunds
             if (!firstPrintFlag) Log.Logger.Information("");
 
             if (failed) Log.Logger.Error($"Requesting IOTA tokens failed to complete within {Program.settings.MaxWaitingTimeInSecondsForRequestingFunds} seconds");
+            else Log.Logger.Information($" It took {Math.Round(stopwatch.Elapsed.TotalSeconds, 0)} seconds");
 
             return !failed;
         }

@@ -11,12 +11,18 @@ namespace SharedLib.Services
         private readonly ICrudRepo<Address> _addressRepo;
         readonly RestClient _dashboardClient;
 
-        public AddressService(ICrudRepo<Address> addressRepo, string dashboardUrl)
+        public AddressService(ICrudRepo<Address> addressRepo)
         {
             if (addressRepo == null) throw new ArgumentException("Argument addressRepo can not be null!");
-            if (dashboardUrl == null) throw new ArgumentException("Argument dashboardUrl can not be null");
 
             _addressRepo = addressRepo;
+            _dashboardClient = null;
+        }
+
+        public AddressService(ICrudRepo<Address> addressRepo, string dashboardUrl) : this(addressRepo)
+        {
+            if (dashboardUrl == null) throw new ArgumentException("Argument dashboardUrl can not be null");
+
             _dashboardClient = new RestClient(dashboardUrl);
         }
 
@@ -52,6 +58,8 @@ namespace SharedLib.Services
 
         public bool AddressExist(string addressValue)
         {
+            if (_dashboardClient == null) throw new ArgumentException("DashboardUrl is not set, can not verify address");
+
             string url = $"/api/address/{addressValue}";
             var request = new RestRequest(url, DataFormat.Json);
 

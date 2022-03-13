@@ -16,7 +16,8 @@ namespace SharedLib.Models
         public override string Id => Url;
 
         public string Url { get; set; }
-        
+        public bool Enabled { get; set; }
+
         [JsonConstructor]
         public Node(string url)
         {

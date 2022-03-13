@@ -2,14 +2,13 @@
   "WalletName": "MyWallet 1",
   "LogFileTransactions": "",
   "PublishReceiveAddress": true,
-  "PublishWebApiUrlOfNodeTakenFromWallet": true,
-  "CliWalletFullpath": "c:\\temp\\iota\\wallet1\\cli-wallet.exe",
+  "CliWalletFullpath": "c:\\temp\\iota\\newwallet1\\cli-wallet.exe",
   "AccessManaId": "",
   "ConsensusManaId": "",
   "UrlWalletReceiveAddresses": "c:\\temp\\iota\\addresses.json",
-  "UrlWalletNode": "c:\\temp\\iota\\nodes.json",
-  "VerifyIfReceiveAddressesExist": false,
-  "GoShimmerDashboardUrl": "http://127.0.0.1:8081",
+  "UrlWalletNodes": "c:\\temp\\iota\\nodes.json",
+  "VerifyIfReceiveAddressesExist": true,
+  "GoShimmerDashboardUrl": "",
   "MinAmountToSend": 21,
   "MaxAmountToSend": 30,
   "TokensToSent": [ "IOTA", "Janneman2" ],
@@ -18,5 +17,21 @@
   "WaitForPreviousTransactionToFinish": true,
   "ShowOutputCliWallet": false,
   "PickRandomDestinationAddress": true,
-  "MaxWaitingTimeInSecondsForRequestingFunds": 90
+  "NodeSelectionMethod": "sequential",
+  "NodeToUseWhenStaticNodeSelectionMethod":  "http://192.168.11.57:8080",
+  "MaxWaitingTimeInSecondsForRequestingFunds": 180,
+  "Logging": {
+    "MinimumLevel": "Verbose",
+    "File": {
+      "Enabled": true,
+      "Path": "Logs/log.txt",
+      "RollingInterval": "Day",
+      "RollOnFileSizeLimit": true,
+      "RestrictedToMinimumLevel": "Verbose"
+    },
+    "Console": {
+      "Enabled": true,
+      "RestrictedToMinimumLevel": "Information"
+    }
+  }
 }

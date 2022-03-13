@@ -14,11 +14,12 @@ using RestSharp;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
-using SharedLib;
+using SharedLib.SettingsModels;
 using SharedLib.Models;
 using SharedLib.Repositories.Addresses;
 using SharedLib.Services;
 using SimpleBase;
+using SharedLib;
 
 /*
  * "I noticed cli-wallet.exe changed it behaviour when sending funds for example... now you can't send two transactions in a row when balance is still pending."
@@ -110,36 +111,62 @@ using SimpleBase;
 //-after each trans. show stats like total send, average conf.time, ...
 //-autocreate minted tokens and add them to the settings: TokensToSent
 
+//-calculate and show total tx, nr of errors, average tx speed in seconds and persist this in a file so you can stop and restart
+//  file should include cli-wallet (and autosendfunds?) version
+
+// bij sending eerst sync status checken anders krijg je error: can't issue payload: tangle not synced
+//   ./cli-wallet server-status
+//   IOTA 2.0 DevNet CLI-Wallet 0.2                                                                                                                                                                              
+//   Server ID:  E35sPFNueGQHgQCUFJPsz4mqqmFzD3tHbEho5H4nZTu7
+//   Server Synced:  false
+//   Server Version:  v0.8.8
+//   Delegation Address:  13aUicm8cZPWaPJTuWqu4jENHE2jwY1EyxR9rSFnQVXCK
+
+// when error bij sending dan niet "sending complete... waiting for ..." loggen!
+// fetching balance niet telkens loggen (alleen eerste keer en laatste keer). Het vult/vervuilt de log nogal
+
+// be sure to check node version to be same as set in settings.json!!
+// bij selecteren van node alleen synced node pakken
+
+// seperate transaction log
+
+// option to get /use wallet receive addresses taken from the explorer
+
+// option to verify nodes when loading
+// test when node is offline later on... will it keep running?
+
 namespace IOTA_Pollen_AutoSendFunds
 {
     class Program
     {
         public static Settings settings;
 
-        public static string lockFile = "";
+        static string lockFile = "";
+
+        static string settingsFile;
+        static string cliWalletConfigFolder;
+        static CliWallet cliWallet;
+        static List<Node> nodes;
+        static Random random = new Random();
+        static int nodeIndex;
+        static int receiveAddressIndex;
+        static List<Address> receiveAddresses;
+        static AddressService addressService;
+        static CliWalletConfig cliWalletConfig;
 
         static async Task Main(string[] args)
         {
+            //Create default minimal logger until settings are loaded
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Verbose() //send all events to sinks
-                .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Information) //Todo: be configurable
-                .WriteTo.File("Logs/log.txt",
-                    rollingInterval: RollingInterval.Day,
-                    rollOnFileSizeLimit: true,
-                    restrictedToMinimumLevel: LogEventLevel.Verbose) //Todo: be configurable
-                .WriteTo.Logger(
-                    x => x.Filter.ByIncludingOnly(y => y.ToString().ToLower().Contains("transaction"))
-                        .WriteTo.File("transaction.log",
-                            rollingInterval: RollingInterval.Day,
-                            rollOnFileSizeLimit: true
-                        ))
-                .CreateLogger();
+             .MinimumLevel.Verbose() //send all events to sinks
+             .WriteTo.Console(restrictedToMinimumLevel: LogEventLevel.Debug)
+             .CreateLogger();
 
-            Log.Logger.Information(("Dashboard - IOTA-Pollen-AutoSendFunds v0.11\n"));
+            Log.Logger.Information(("Dashboard - IOTA-Pollen-AutoSendFunds v0.13 - 13 March 2022\n"));
             Log.Logger.Information(" Escape to quit");
             Log.Logger.Information(" Space to pause\n");
 
-            var settingsFile = ParseArguments(args);
+            settingsFile = ParseArguments(args);
 
             if (!File.Exists(settingsFile))
             {
@@ -149,66 +176,17 @@ namespace IOTA_Pollen_AutoSendFunds
 
             //settingsFile = "c:\\temp\\iota\\newwallet3\\settings.json"; //override for testing purposes
 
-            Log.Logger.Information($"Loading settings from {settingsFile}\n");
-
-            settings = MiscUtil.LoadSettings(settingsFile);
-
-            //first check if wallet exist
-            if (!CliWallet.Exist(settings.CliWalletFullpath))
-            {
-                Log.Logger.Warning($"Wallet not found! File does not exist: {CliWallet.DefaultWalletFile(settings.CliWalletFullpath)}");
-                //CleanExit(1);
-                Log.Logger.Information("Creating new wallet!");
-                await CliWallet.Init();
-            }
-
-            await UpdateSettings(settingsFile);
-
-            string cliWalletConfigFolder = Path.GetDirectoryName(settings.CliWalletFullpath);
-            await WriteLockFile(cliWalletConfigFolder);
-
-            //Todo: temporary solution for error: "The SSL connection could not be established, see inner exception."
-            //       when using RestSharp.
-            //      Postman generates a warning: "Unable to verify the first certificate"
-            ServicePointManager.ServerCertificateValidationCallback +=
-                (sender, certificate, chain, sslPolicyErrors) => true;
-
-            CliWallet cliWallet = new CliWallet();
-            await cliWallet.UpdateAddresses();
-
-            //PublishReceiveAddress
-            AddressService addressService = new AddressService(RepoFactory.CreateAddressRepo(settings.UrlWalletReceiveAddresses), settings.GoShimmerDashboardUrl);
-
-            if (settings.PublishReceiveAddress) addressService.Add(cliWallet.ReceiveAddress);
-            else addressService.Delete(cliWallet.ReceiveAddress.AddressValue);
-
-            //PublishWebApiUrlOfNodeTakenFromWallet
-            string jsonCliWalletConfig = File.ReadAllText(MiscUtil.CliWalletConfig(cliWalletConfigFolder));
-            CliWalletConfig cliWalletConfig = JsonConvert.DeserializeObject<CliWalletConfig>(jsonCliWalletConfig);
-
-            //Todo: 
-            NodeService nodeService = new NodeService(RepoFactory.CreateNodeRepo(settings.UrlWalletNode));
-
-            string nodeUrl = cliWalletConfig.WebAPI;
-            Node node = new Node(nodeUrl);
-            if (settings.PublishWebApiUrlOfNodeTakenFromWallet) nodeService.Add(node);
-            else nodeService.Delete(nodeUrl);
-
-            List<Address> receiveAddresses = LoadReceiveAddresses(cliWallet, addressService);
-
-            Random random = new Random();
-            int receiveAddressIndex = -1;
+            await Init(true);
 
             bool waitForAnyPositiveBalance = false;
             while (true)
             {
-
-                await cliWallet.UpdateBalances();
-
                 var balancePicked = new { Color = "", Value = 0 }; //init to make compiler happy
                 bool resultRequestFunds = true;
                 do
                 {
+                    await cliWallet.UpdateBalances();
+
                     //pick random token
                     var filtered = cliWallet.Balances
                         .Where(balance => balance.BalanceStatus == BalanceStatus.Ok)
@@ -259,6 +237,7 @@ namespace IOTA_Pollen_AutoSendFunds
 
                 if (!resultRequestFunds) CleanExit(1);
 
+                bool sendFundsResult = true;
                 if (balancePicked != null)
                 {
                     //random amount respecting available balanceValue
@@ -272,25 +251,41 @@ namespace IOTA_Pollen_AutoSendFunds
                     else //sequential
                         receiveAddressIndex = (receiveAddressIndex + 1) % receiveAddresses.Count;
 
-                    Address address = receiveAddresses[receiveAddressIndex];
-                    await cliWallet.SendFunds(amount, address, balancePicked.Color);
+                    Address receiveAddress = receiveAddresses[receiveAddressIndex];
 
+                    //determine access- and consensus mana pledging
+                    string accessManaId = DetermineToWhichNodeToPledgeTo(settings.AccessManaId, cliWalletConfig);
+                    string consensusManaId = DetermineToWhichNodeToPledgeTo(settings.ConsensusManaId, cliWalletConfig);
 
-                    int remainingTimeBetweenTransactions = settings.WaitingTimeInSecondsBetweenTransactions;
-                    while (remainingTimeBetweenTransactions > 0)
+                    if (settings.NodeSelectionMethod != NodeSelectionMethod.Static)
+                        Log.Logger.Information($"Using node {cliWalletConfig.WebAPI} with identity {MiscUtil.GetIdentityId(cliWalletConfig.WebAPI)}");
+
+                    sendFundsResult = await cliWallet.SendFunds(amount, receiveAddress, balancePicked.Color, accessManaId, consensusManaId);
+
+                    if (sendFundsResult)
                     {
-                        if (remainingTimeBetweenTransactions == settings.WaitingTimeInSecondsBetweenTransactions)
-                            Log.Logger.Debug($"\nSleeping between transactions:");
-                        Log.Logger.Debug($" {remainingTimeBetweenTransactions}");
+                        int remainingTimeBetweenTransactions = settings.WaitingTimeInSecondsBetweenTransactions;
+                        while (remainingTimeBetweenTransactions > 0)
+                        {
+                            if (remainingTimeBetweenTransactions == settings.WaitingTimeInSecondsBetweenTransactions)
+                                Log.Logger.Debug($"\nSleeping between transactions:");
+                            Log.Logger.Debug($" {remainingTimeBetweenTransactions}");
 
-                        Thread.Sleep(1000);
-                        remainingTimeBetweenTransactions--;
+                            Thread.Sleep(1000);
+                            remainingTimeBetweenTransactions--;
 
-                        if (remainingTimeBetweenTransactions == 0) Log.Logger.Information("");
+                            if (remainingTimeBetweenTransactions == 0) Log.Logger.Information("");
+                        }
                     }
                 }
 
-                bool pause = false;
+                if (!sendFundsResult)
+                {
+                    Log.Logger.Error("Sending funds failed with an error and/or to return to OK balance took too long.");
+                    Log.Logger.Information("Pausing... Press <space> to continue, B = Balance, R = Reload Addresses, Nodes and Config, <escape> to quit!");
+                }
+
+                bool pause = !sendFundsResult;
                 while (Console.KeyAvailable || (pause))
                 {
                     if (Console.KeyAvailable || (pause))
@@ -302,7 +297,7 @@ namespace IOTA_Pollen_AutoSendFunds
                             if (pause) pause = false; //continue
                             else
                             {
-                                Log.Logger.Information("Pausing... Press <space> to continue, B = Balance, R = Reload Addresses and Config, <escape> to quit!");
+                                Log.Logger.Information("Pausing... Press <space> to continue, B = Balance, R = Reload Addresses, Nodes and Config, <escape> to quit!");
                                 pause = true;
                             }
                         }
@@ -315,13 +310,122 @@ namespace IOTA_Pollen_AutoSendFunds
 
                         if (cki.Key == ConsoleKey.R) //reload addresses and config
                         {
-                            Log.Logger.Information("Reloading addresses and config!");
-                            settings = MiscUtil.LoadSettings(settingsFile);
-                            receiveAddresses = LoadReceiveAddresses(cliWallet, addressService);
+                            Log.Logger.Information("Reloading Addresses, Nodes and Config!");
+                            await Init(false);
                         }
                     }
                 }
+
+                //pick node
+                nodeIndex = PickNode(cliWalletConfigFolder, cliWalletConfig, nodes, random, nodeIndex);
             }
+        }
+
+        private static async Task Init(bool firstTime)
+        {
+            try
+            {
+                settings = MiscUtil.LoadSettings(settingsFile);
+            }
+            catch (Exception e)
+            {
+                Log.Logger.Error(e.Message);
+                CleanExit(1);
+            }
+            MiscUtil.WriteSettings(settingsFile, settings);
+
+            InitLogging();
+
+            cliWalletConfigFolder = Path.GetDirectoryName(settings.CliWalletFullpath);
+
+            if (firstTime)
+            {
+                WriteLockFile(cliWalletConfigFolder);
+
+                //Todo: temporary solution for error: "The SSL connection could not be established, see inner exception."
+                //       when using RestSharp.
+                //      Postman generates a warning: "Unable to verify the first certificate"
+                ServicePointManager.ServerCertificateValidationCallback +=
+                    (sender, certificate, chain, sslPolicyErrors) => true;
+            }
+            else
+            {
+                RemoveLockFile();
+                WriteLockFile(cliWalletConfigFolder);
+            }
+
+            nodeIndex = 0;
+            NodeService nodeService = new NodeService(RepoFactory.CreateNodeRepo(settings.UrlWalletNodes));
+
+            //init cliWallet
+            cliWallet = new CliWallet();
+            nodes = LoadEnabledNodes(cliWallet, nodeService);
+
+            //pick a node so we can update addresses
+            cliWalletConfig = await LoadCliWalletConfig(cliWalletConfigFolder);
+            nodeIndex = PickNode(cliWalletConfigFolder, cliWalletConfig, nodes, random, nodeIndex);
+            if (settings.NodeSelectionMethod == NodeSelectionMethod.Static)
+                Log.Logger.Information($"Using node {cliWalletConfig.WebAPI} with identity {MiscUtil.GetIdentityId(cliWalletConfig.WebAPI)}");
+
+            //first check if wallet exist in folder where cli-wallet executable is in
+            if (!CliWallet.Exist(settings.CliWalletFullpath))
+            {
+                Log.Logger.Warning($"Wallet not found! File does not exist: {CliWallet.DefaultWalletFile(settings.CliWalletFullpath)}");
+                //CleanExit(1);
+                Log.Logger.Information("Creating new wallet!");
+                await CliWallet.Init();
+            }
+
+            //now we can update addresses
+            await cliWallet.UpdateAddresses();
+
+            addressService = new AddressService(RepoFactory.CreateAddressRepo(settings.UrlWalletReceiveAddresses), settings.GoShimmerDashboardUrl);
+
+            if (settings.PublishReceiveAddress) addressService.Add(cliWallet.ReceiveAddress);
+            else addressService.Delete(cliWallet.ReceiveAddress.AddressValue);
+
+            receiveAddresses = LoadReceiveAddresses(cliWallet, addressService);
+            receiveAddressIndex = 0;
+        }
+
+        private static int PickNode(string cliWalletConfigFolder, CliWalletConfig cliWalletConfig, List<Node> nodes, Random random, int nodeIndex)
+        {
+            if (settings.NodeSelectionMethod == NodeSelectionMethod.Static) //static
+            {
+                cliWalletConfig.WebAPI = settings.NodeToUseWhenStaticNodeSelectionMethod;
+            }
+            else
+            {
+                if (settings.NodeSelectionMethod == NodeSelectionMethod.Random) //random
+                    nodeIndex = random.Next(nodes.Count);
+                else if (settings.NodeSelectionMethod == NodeSelectionMethod.Sequential)//sequential
+                    nodeIndex = (nodeIndex + 1) % nodes.Count;
+
+                cliWalletConfig.WebAPI = nodes[nodeIndex].Url;
+            }
+            SaveCliWalletConfig(cliWalletConfigFolder, cliWalletConfig);
+
+            return nodeIndex;
+        }
+
+        private static async Task<CliWalletConfig> LoadCliWalletConfig(string cliWalletConfigFolder)
+        {
+            //if not exist just run cli-wallet once which creates a `config.json`
+            if (!File.Exists(MiscUtil.CliWalletConfig(cliWalletConfigFolder)))
+            {
+                CommandLine commandLine = new CommandLine(Program.settings.CliWalletFullpath, "");
+                await commandLine.Run(); //ignore potential error because it also tries to connect to the default WebAPI
+            }
+
+            string jsonCliWalletConfig = File.ReadAllText(MiscUtil.CliWalletConfig(cliWalletConfigFolder));
+            CliWalletConfig cliWalletConfig = JsonConvert.DeserializeObject<CliWalletConfig>(jsonCliWalletConfig);
+            return cliWalletConfig;
+        }
+
+        private static void SaveCliWalletConfig(string cliWalletConfigFolder, CliWalletConfig cliWalletConfig)
+        {
+            string contents = JsonConvert.SerializeObject(cliWalletConfig, Formatting.Indented);
+            File.WriteAllText(MiscUtil.CliWalletConfig(cliWalletConfigFolder), contents);
         }
 
         private static List<Address> LoadReceiveAddresses(CliWallet cliWallet, AddressService addressService)
@@ -330,6 +434,14 @@ namespace IOTA_Pollen_AutoSendFunds
             //only consider receiveAddresses of other persons
             receiveAddresses = receiveAddresses
                 .Where(receiveAddress => !receiveAddress.Equals(cliWallet.ReceiveAddress)).ToList();
+
+            int count = receiveAddresses.Count;
+
+            receiveAddresses = receiveAddresses.Where(receiveAddress => receiveAddress.IsVerified).ToList();
+            int delta = receiveAddresses.Count;
+
+            if (delta > 0) Log.Logger.Information($"Skipped {delta} unverified receive addresses");
+            Log.Logger.Information($"Total verified receive addresses: {receiveAddresses.Count}");
 
             if (receiveAddresses.Count == 0)
             {
@@ -340,54 +452,43 @@ namespace IOTA_Pollen_AutoSendFunds
             return receiveAddresses;
         }
 
-        private static async Task UpdateSettings(string settingsFile)
+        private static List<Node> LoadEnabledNodes(CliWallet cliWallet, NodeService nodeService)
         {
-            string cliWalletConfigFolder = Path.GetDirectoryName(settings.CliWalletFullpath);
+            List<Node> enabledNodes = nodeService
+                .GetAll()
+                .Where(node => node.Enabled)
+                .ToList();
 
-            //update empty default values in settings
-            // 1. AccessManaId and ConsensusManaId
-            string jsonCliWalletConfig = File.ReadAllText(MiscUtil.CliWalletConfig(cliWalletConfigFolder));
-            CliWalletConfig cliWalletConfig = JsonConvert.DeserializeObject<CliWalletConfig>(jsonCliWalletConfig);
-
-            bool updateAccessManaId = (settings.AccessManaId.Trim() == "");
-            bool updateConsensusManaId = (settings.ConsensusManaId.Trim() == "");
-            if (updateAccessManaId || updateConsensusManaId)
+            if (enabledNodes.Count == 0 && settings.NodeSelectionMethod != NodeSelectionMethod.Static)
             {
-                string identityId = MiscUtil.GetIdentityId(cliWalletConfig.WebAPI);
-                if (updateAccessManaId) settings.AccessManaId = identityId;
-                if (updateConsensusManaId) settings.ConsensusManaId = identityId;
+                Log.Logger.Fatal($"No enabled nodes available at {Program.settings.UrlWalletNodes} and NodeSelectionMethod is not Static! Exiting...");
+                CleanExit(1);
             }
 
-            // 2. GoShimmerDashboardUrl
-            if (settings.GoShimmerDashboardUrl.Trim() == "")
-            {
-                Uri myUri = new Uri(cliWalletConfig.WebAPI);
-                string scheme = myUri.Scheme;
-                if (scheme.Trim() == "") scheme = "http";
-                string host = $"{scheme}{Uri.SchemeDelimiter}{myUri.Host}:8081";
-                settings.GoShimmerDashboardUrl = host;
-            }
-
-            // 3. Urls
-            bool updateUrlWalletReceiveAddresses = (settings.UrlWalletReceiveAddresses.Trim() == "");
-            bool updateUrlWalletNode = (settings.UrlWalletNode.Trim() == "");
-            if (updateUrlWalletReceiveAddresses) settings.UrlWalletReceiveAddresses = Settings.defaultUrlApiServer;
-            if (updateUrlWalletNode) settings.UrlWalletNode = Settings.defaultUrlApiServer;
-
-            //write settings back
-            await File.WriteAllTextAsync(settingsFile, JsonConvert.SerializeObject(settings, Formatting.Indented));
+            return enabledNodes;
         }
 
-        private static async Task WriteLockFile(string folder)
+        private static string DetermineToWhichNodeToPledgeTo(string identityId, CliWalletConfig cliWalletConfig)
+        {
+            bool update = (identityId.Trim() == "");
+            if (update)
+            {
+                return MiscUtil.GetIdentityId(cliWalletConfig.WebAPI);
+            }
+            else return ""; //just use empty string as cli-wallet will then by default pledge to the connected node
+        }
+
+        private static void WriteLockFile(string folder)
         {
             lockFile = MiscUtil.DefaultLockFile(folder);
+
             //check if program already started for this wallet by checking for lockfile
             if (File.Exists(lockFile))
             {
                 bool found = true;
                 try
                 {
-                    int id = Convert.ToInt32(await File.ReadAllTextAsync(lockFile));
+                    int id = Convert.ToInt32(File.ReadAllText(lockFile));
                     Process.GetProcessById(id);
                 }
                 catch
@@ -404,7 +505,12 @@ namespace IOTA_Pollen_AutoSendFunds
             }
 
             //create lockfile to prevent running multiple program instances for same wallet
-            await File.WriteAllTextAsync(lockFile, Environment.ProcessId.ToString());
+            File.WriteAllText(lockFile, Environment.ProcessId.ToString());
+        }
+
+        private static void RemoveLockFile(bool removeLockFile = true)
+        {
+            if (removeLockFile && File.Exists(lockFile)) File.Delete(lockFile);
         }
 
         private static string ParseArguments(string[] args)
@@ -432,8 +538,27 @@ namespace IOTA_Pollen_AutoSendFunds
 
         static void CleanExit(int exitCode = 0, bool removeLockFile = true)
         {
-            if (removeLockFile && File.Exists(lockFile)) File.Delete(lockFile);
+            RemoveLockFile(removeLockFile);
             Environment.Exit(exitCode);
+        }
+
+        private static void InitLogging()
+        {
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Is(settings.Logging.MinimumLevel)
+                .WriteTo.Console(restrictedToMinimumLevel: settings.Logging.Console.RestrictedToMinimumLevel)
+                .WriteTo.File(
+                    path: settings.Logging.File.Path,
+                    rollingInterval: settings.Logging.File.RollingInterval,
+                    rollOnFileSizeLimit: settings.Logging.File.RollOnFileSizeLimit,
+                    restrictedToMinimumLevel: settings.Logging.File.RestrictedToMinimumLevel)
+                //.WriteTo.Logger(
+                //    x => x.Filter.ByIncludingOnly(y => y.ToString().ToLower().Contains("transaction"))
+                //        .WriteTo.File("transaction.log",
+                //            rollingInterval: RollingInterval.Day,
+                //            rollOnFileSizeLimit: true
+                //        ))
+                .CreateLogger();
         }
     }
 }

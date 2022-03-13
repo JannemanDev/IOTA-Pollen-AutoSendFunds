@@ -1,4 +1,4 @@
-set version=0.11
+set version=0.13
 
 rem Root solution folder
 cd /d "C:\MyData\Persoonlijk\IOTA\IOTA-Pollen-AutoSendFunds"
