@@ -135,6 +135,9 @@ using SharedLib;
 // option to verify nodes when loading
 // test when node is offline later on... will it keep running?
 
+// verifyaddress mbv website werkt niet als wallet net gemaakt is of nog geen txs zijn gedaan!
+// sommige API van nodes hebben login/ww nodig (gebruiken reverse proxy) -> node lijst uitbreiden hiermee
+
 namespace IOTA_Pollen_AutoSendFunds
 {
     class Program
@@ -438,7 +441,7 @@ namespace IOTA_Pollen_AutoSendFunds
             int count = receiveAddresses.Count;
 
             receiveAddresses = receiveAddresses.Where(receiveAddress => receiveAddress.IsVerified).ToList();
-            int delta = receiveAddresses.Count;
+            int delta = count - receiveAddresses.Count;
 
             if (delta > 0) Log.Logger.Information($"Skipped {delta} unverified receive addresses");
             Log.Logger.Information($"Total verified receive addresses: {receiveAddresses.Count}");
