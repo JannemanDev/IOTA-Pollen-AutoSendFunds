@@ -1,13 +1,20 @@
 {
   "nodes": [
     {
-      "url": "http://45.83.107.51:8080"
+      "url": "http://45.83.107.51:8080",
+	  "enabled": true
     },
     {
-      "url": "http://127.0.0.1:8080"
+      "url": "http://h2932964.stratoserver.net:8080",
+	  "enabled": true
     },
     {
-      "url": "http://192.168.11.57:8080"
+      "url": "https://purkdrf.dlt.green:8080",
+	  "enabled": false
+    },
+    {
+      "url": "http://nrgvrvunlv4jhbjo.myfritz.net:8080",
+	  "enabled": true
     }
   ]
 }
