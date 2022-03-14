@@ -7,7 +7,7 @@
   "ConsensusManaId": "",
   "UrlWalletReceiveAddresses": "c:\\temp\\iota\\addresses.json",
   "UrlWalletNodes": "c:\\temp\\iota\\nodes.json",
-  "VerifyIfReceiveAddressesExist": true,
+  "VerifyIfReceiveAddressesExist": false,
   "GoShimmerDashboardUrl": "",
   "MinAmountToSend": 21,
   "MaxAmountToSend": 30,
@@ -18,7 +18,7 @@
   "ShowOutputCliWallet": false,
   "PickRandomDestinationAddress": true,
   "NodeSelectionMethod": "sequential",
-  "NodeToUseWhenStaticNodeSelectionMethod":  "http://192.168.11.57:8080",
+  "NodeToUseWhenStaticNodeSelectionMethod": "http://127.0.01:8080",
   "MaxWaitingTimeInSecondsForRequestingFunds": 180,
   "Logging": {
     "MinimumLevel": "Verbose",
